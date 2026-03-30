@@ -1,0 +1,16 @@
+# Local configuration with sensitive API keys
+# This file is in .gitignore - never commit to version control!
+#
+# Copy from template and fill in your actual keys:
+# cp config/topics/template.yaml config/local.yaml
+
+api_keys:
+  semantic_scholar: ""  # Your SS API key here
+  zotero:
+    library_id: "14021209"
+    api_key: ""  # Your Zotero API key here
+    library_type: "user"
+
+notification:
+  bark_key: ""  # Your Bark device key here
+  bark_url: "https://bark.deepthinks.org"

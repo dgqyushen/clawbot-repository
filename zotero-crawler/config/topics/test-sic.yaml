@@ -16,13 +16,14 @@ zotero:
     - "si-c"
 
 notification:
-  bark_key: "8ZjK6Saa5OFQ3fBCTaUjJR"
+  # Bark device key - set via BARK_KEY environment variable or config/local.yaml
+  bark_key: "${BARK_KEY}"
   bark_url: "https://bark.deepthinks.org"
   max_detail_papers: 3
 
 api_keys:
-  semantic_scholar: ""
+  semantic_scholar: "${SEMANTIC_SCHOLAR_API_KEY}"
   zotero:
-    library_id: "14021209"
-    api_key: "1lio7Ai65J0B1wsmBRAXL0ju"
-    library_type: "user"
+    library_id: "${ZOTERO_LIBRARY_ID}"
+    api_key: "${ZOTERO_API_KEY}"
+    library_type: "${ZOTERO_LIBRARY_TYPE:-user}"

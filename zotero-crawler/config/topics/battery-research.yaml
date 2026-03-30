@@ -34,13 +34,20 @@ zotero:
     - "crawler"
 
 notification:
-  bark_key: "8ZjK6Saa5OFQ3fBCTaUjJR"
+  # Bark device key - set via BARK_KEY environment variable or config/local.yaml
+  # Get from Bark app: Settings -> Device Key
+  bark_key: "${BARK_KEY}"
   bark_url: "https://bark.deepthinks.org"
   max_detail_papers: 5
 
 api_keys:
-  semantic_scholar: ""  # 等你从 https://www.semanticscholar.org/product/api 获取后填入
+  # Semantic Scholar API Key - set via SEMANTIC_SCHOLAR_API_KEY env var
+  # Get from: https://www.semanticscholar.org/product/api
+  semantic_scholar: "${SEMANTIC_SCHOLAR_API_KEY}"
+  
+  # Zotero API credentials - set via ZOTERO_API_KEY, ZOTERO_LIBRARY_ID env vars
+  # Get from: https://www.zotero.org/settings/keys
   zotero:
-    library_id: "14021209"
-    api_key: "1lio7Ai65J0B1wsmBRAXL0ju"
-    library_type: "user"
+    library_id: "${ZOTERO_LIBRARY_ID}"
+    api_key: "${ZOTERO_API_KEY}"
+    library_type: "${ZOTERO_LIBRARY_TYPE:-user}"

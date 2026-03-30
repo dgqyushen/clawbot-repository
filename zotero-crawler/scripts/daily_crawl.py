@@ -7,7 +7,6 @@ and imports metadata to Zotero.
 """
 
 import sys
-import yaml
 import argparse
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -20,6 +19,7 @@ from semantic_scholar import SemanticScholarClient, Paper
 from database import PaperDatabase
 from zotero_export import ZoteroClient, export_to_csv
 from notifier import BarkNotifier
+from config_loader import load_config, get_api_key
 
 
 def setup_logging():
@@ -38,12 +38,6 @@ def setup_logging():
         retention="30 days",
         level="DEBUG",
     )
-
-
-def load_config(config_path: str) -> dict:
-    """Load YAML configuration."""
-    with open(config_path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
 
 
 def run_crawl(config: dict, dry_run: bool = False, since: str = None):

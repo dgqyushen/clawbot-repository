@@ -1,4 +1,4 @@
-# Python
+# Zotero Crawler - Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -22,8 +22,19 @@ logs/
 .vscode/
 .idea/
 *.swp
-*.swo
+*.swp
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Sensitive configuration - NEVER commit these!
+.env
+config/local.yaml
+config/local-*.yaml
+secrets.yaml
+*_secret*.yaml
+
+# Output directories
+data/
+output/
