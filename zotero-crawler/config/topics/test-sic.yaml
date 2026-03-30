@@ -1,0 +1,28 @@
+# Test config for Si C Anode
+keywords:
+  primary:
+    - "Si C Anode"
+  secondary: []
+
+search:
+  max_results_per_keyword: 5
+  sort_by: "publicationDate"
+  min_year: 2023
+
+zotero:
+  target_collection: "Test Import"
+  tags:
+    - "test"
+    - "si-c"
+
+notification:
+  bark_key: ""
+  bark_url: "https://api.day.app"
+  max_detail_papers: 3
+
+api_keys:
+  semantic_scholar: ""
+  zotero:
+    library_id: "14021209"
+    api_key: "1lio7Ai65J0B1wsmBRAXL0ju"
+    library_type: "user"

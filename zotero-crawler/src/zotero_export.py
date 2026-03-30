@@ -66,10 +66,10 @@ class ZoteroClient:
         """Create a new collection."""
         url = f"{self.BASE_URL}/{self.library_type}s/{self.library_id}/collections"
         
-        data = {
-            "name": name,
-            "parentCollection": parent_key,
-        }
+        # Zotero API requires JSON array for collections
+        data = [{"name": name}]
+        if parent_key:
+            data[0]["parentCollection"] = parent_key
         
         try:
             response = self.client.post(url, json=data)
@@ -99,7 +99,8 @@ class ZoteroClient:
         """
         url = f"{self.BASE_URL}/{self.library_type}s/{self.library_id}/items"
         
-        data = {"items": [item]}
+        # Zotero API requires JSON array for items
+        data = [item]
         
         if collection_key:
             url += f"?collection={collection_key}"
@@ -108,13 +109,25 @@ class ZoteroClient:
             response = self.client.post(url, json=data)
             response.raise_for_status()
             
+            # Zotero returns 200 with successful object
             result = response.json()
-            if result.get("success"):
-                item_key = list(result["success"].values())[0]
-                logger.debug(f"Created item: {item['title'][:50]}... ({item_key})")
-                return item_key
-            else:
-                raise Exception(f"Item creation failed: {result}")
+            
+            # The response is typically a dictionary with "success", "failed", "unchanged"
+            if isinstance(result, dict) and "success" in result:
+                success_keys = list(result["success"].keys())
+                if success_keys:
+                    item_key = success_keys[0]
+                    logger.debug(f"Created item: {item.get('title', 'Unknown')[:50]}... ({item_key})")
+                    return item_key
+            
+            # If response is a list, extract first item key
+            if isinstance(result, list) and len(result) > 0:
+                first_item = result[0]
+                if isinstance(first_item, dict) and "key" in first_item:
+                    return first_item["key"]
+            
+            logger.warning(f"Unexpected response format: {result}")
+            return None
                 
         except httpx.HTTPError as e:
             logger.error(f"Failed to create item: {e}")

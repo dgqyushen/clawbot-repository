@@ -39,8 +39,8 @@ notification:
   max_detail_papers: 5
 
 api_keys:
-  semantic_scholar: ""  # Fill in your key
+  semantic_scholar: ""  # 等你从 https://www.semanticscholar.org/product/api 获取后填入
   zotero:
     library_id: "14021209"
-    api_key: ""  # Fill in your key
+    api_key: "1lio7Ai65J0B1wsmBRAXL0ju"
     library_type: "user"
