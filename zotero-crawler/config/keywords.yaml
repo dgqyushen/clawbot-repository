@@ -1,0 +1,89 @@
+# Keywords Configuration for Zotero Literature Crawler
+
+# Search topics - each will be queried against Semantic Scholar
+keywords:
+  # Primary research topics
+  primary:
+    - "silicon-carbon anode"
+    - "Si-C composite anode"
+    - "silicon carbon battery"
+    - "sodium iron sulfate"
+    - "Alluaudite cathode"
+    - "Na-ion battery cathode"
+  
+  # Secondary/related topics
+  secondary:
+    - "solid electrolyte interphase silicon"
+    - "SEI stabilization silicon anode"
+    - "high capacity anode material"
+    - "conversion reaction battery"
+
+# Search settings
+search:
+  # Publication types to include
+  publication_types:
+    - "JournalArticle"
+    - "Conference"
+  
+  # Fields to fetch from API
+  fields:
+    - "title"
+    - "authors"
+    - "year"
+    - "citationCount"
+    - "publicationDate"
+    - "journal"
+    - "abstract"
+    - "externalIds"
+    - "openAccessPdf"
+    - "s2FieldsOfStudy"
+    - "tldr"
+  
+  # Result limits per keyword
+  max_results_per_keyword: 10
+  
+  # Sort by: citationCount, publicationDate, relevance
+  sort_by: "publicationDate"
+  
+  # Minimum year (e.g., only papers from 2020 onward)
+  min_year: 2020
+
+# Deduplication settings
+deduplication:
+  # Primary key for deduplication: DOI, or fallback to title hash
+  primary_key: "doi"
+  
+  # Also check title similarity to catch papers without DOI
+  title_similarity_threshold: 0.9
+
+# Zotero export settings
+zotero:
+  # Target collection name (will be created if not exists)
+  target_collection: "Daily Auto-Import"
+  
+  # Tag all imported papers
+  tags:
+    - "auto-import"
+    - "crawler"
+  
+  # Add citation count as note
+  add_citation_note: true
+
+# Notification settings
+notification:
+  # Bark device key for notifications
+  bark_key: "fQHgYruSejzvDlsGbMlezt"
+  
+  # Bark server URL
+  bark_url: "https://bark.deepthinks.org"
+  
+  # Max papers to include in notification detail
+  max_detail_papers: 5
+
+# API Keys (fill these in)
+api_keys:
+  semantic_scholar: ""  # Get from https://www.semanticscholar.org/product/api
+  zotero:
+    library_id: "14021209"  # Your Zotero user ID
+    api_key: ""             # Your Zotero API key
+    library_type: "user"    # "user" or "group"
