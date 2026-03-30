@@ -93,11 +93,16 @@ def run_crawl(config: dict, dry_run: bool = False, since: str = None):
     imported_papers = []
     errors = []
     
+    notifier = None
+    
     try:
         # Initialize components
         with SemanticScholarClient(api_key=ss_api_key) as ss_client, \
-             PaperDatabase() as db, \
-             BarkNotifier(bark_key, bark_url) as notifier if bark_key else None as notifier:
+             PaperDatabase() as db:
+            
+            # Initialize notifier if configured
+            if bark_key:
+                notifier = BarkNotifier(bark_key, bark_url)
             
             # Initialize Zotero client if not dry_run
             zotero = None
@@ -178,6 +183,10 @@ def run_crawl(config: dict, dry_run: bool = False, since: str = None):
             # Close Zotero client if opened
             if zotero:
                 zotero.close()
+            
+            # Close notifier if opened
+            if notifier:
+                notifier.close()
             
             # Send notification
             if notifier and (total_new > 0 or errors):
