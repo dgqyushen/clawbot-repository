@@ -1,3 +1,8 @@
+---
+name: adb-connect
+description: Connect to Android emulators or devices via ADB (Android Debug Bridge) from within Docker/container environments. Use when the user wants to connect to Android devices, take screenshots from emulators, or troubleshoot ADB connections.
+---
+
 # ADB Connect Skill
 
 Connect to Android emulators or devices via ADB (Android Debug Bridge) from within Docker/container environments.

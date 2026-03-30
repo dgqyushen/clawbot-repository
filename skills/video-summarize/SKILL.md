@@ -1,3 +1,8 @@
+---
+name: video-summarize
+description: Download, transcribe, and summarize YouTube videos using local Whisper model. Use when the user wants to summarize a YouTube video, extract key points from video content, or get transcripts from online videos.
+---
+
 # Video Summarize Skill
 
 Download, transcribe, and summarize YouTube videos using local Whisper model.

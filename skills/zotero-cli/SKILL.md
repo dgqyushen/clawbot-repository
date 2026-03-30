@@ -1,3 +1,8 @@
+---
+name: zotero-cli
+description: Connect to Zotero library via zotero-cli tool for searching, managing, and annotating research papers. Use when the user wants to search their Zotero library, find research papers, add notes to citations, or export references.
+---
+
 # Zotero CLI Skill for OpenClaw
 
 ## 概述
