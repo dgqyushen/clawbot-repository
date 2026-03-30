@@ -1,24 +1,28 @@
-# clawbot-repository
+# Projects Repository
 
-这是 Ethan 的统一代码仓库（monorepo）。
+这是 Ethan 的统一项目仓库（monorepo），由 ClawBot 协助开发的所有项目集中存放于此。
 
-## 目标
+## 📁 目录结构
 
-- 所有由 ClawBot 协助开发的小项目，统一放在这个仓库的子文件夹中。
-- 便于在手机端远程下发需求、追踪进度、集中管理代码与版本。
+```
+projects/
+├── README.md              # 本文件
+├── skills/               # 技能备份（与 workspace/skills 同步）
+├── hello_world/          # 示例项目
+└── [新项目按目录存放]     # 每个项目独立子目录
+```
 
-## 当前项目
+## 🔄 技能备份
 
-- `hello_world/`：最小可运行 Python 示例项目。
+`skills/` 目录下的技能定义会与主工作区的 `workspace/skills/` 保持同步。
+- 主开发在工作区进行
+- 定期提交备份到此仓库
 
-## 使用方式
+## 📝 工作流
 
-1. 在 Telegram 里直接描述需求（功能、技术栈、验收标准）。
-2. ClawBot 在对应子目录创建/修改代码。
-3. 完成后回传变更摘要、测试结果与提交记录。
+1. 在 Telegram/微信描述需求
+2. ClawBot 在 `projects/` 下创建/修改代码
+3. 完成后提交到 GitHub 并反馈变更摘要
 
-## 约定
-
-- 每个新任务优先新建独立子目录。
-- 重要改动尽量附带 README 与最小运行说明。
-- 默认保持项目结构清晰，避免互相污染依赖。
+---
+*Last updated: 2026-03-30*
