@@ -34,7 +34,7 @@ zotero:
     - "crawler"
 
 notification:
-  bark_key: "fQHgYruSejzvDlsGbMlezt"
+  bark_key: "8ZjK6Saa5OFQ3fBCTaUjJR"
   bark_url: "https://bark.deepthinks.org"
   max_detail_papers: 5
 

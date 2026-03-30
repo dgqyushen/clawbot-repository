@@ -16,8 +16,8 @@ zotero:
     - "si-c"
 
 notification:
-  bark_key: ""
-  bark_url: "https://api.day.app"
+  bark_key: "8ZjK6Saa5OFQ3fBCTaUjJR"
+  bark_url: "https://bark.deepthinks.org"
   max_detail_papers: 3
 
 api_keys:
