@@ -1,0 +1,42 @@
+# AI/ML Research Topics
+# 
+# Example topic-specific configuration for AI/ML research.
+# Usage:
+#   python scripts/daily_crawl.py --config config/topics/ai-ml.yaml
+
+keywords:
+  primary:
+    - "large language model"
+    - "transformer architecture"
+    - "attention mechanism"
+    - "fine-tuning"
+  
+  secondary:
+    - "prompt engineering"
+    - "in-context learning"
+    - "chain of thought"
+    - "Retrieval-Augmented Generation"
+    - "RAG"
+
+search:
+  max_results_per_keyword: 10
+  sort_by: "citationCount"  # For hot AI papers, sort by citations
+  min_year: 2022  # Fast-moving field, only recent papers
+
+zotero:
+  target_collection: "AI/ML Literature"
+  tags:
+    - "ai-ml"
+    - "auto-import"
+
+notification:
+  bark_key: ""
+  bark_url: "https://api.day.app"
+  max_detail_papers: 5
+
+api_keys:
+  semantic_scholar: ""
+  zotero:
+    library_id: ""
+    api_key: ""
+    library_type: "user"

@@ -1,30 +1,26 @@
-# Keywords Configuration for Zotero Literature Crawler
+# Generic Literature Crawler Configuration
+# 
+# This is a template configuration file. To use:
+# 1. Copy this file to create a topic-specific config (e.g., battery-research.yaml)
+# 2. Fill in your API keys
+# 3. Define your search keywords
+# 4. Run: python scripts/daily_crawl.py --config your-config.yaml
 
 # Search topics - each will be queried against Semantic Scholar
+# Organize by priority or category as needed
 keywords:
-  # Primary research topics
-  primary:
-    - "silicon-carbon anode"
-    - "Si-C composite anode"
-    - "silicon carbon battery"
-    - "sodium iron sulfate"
-    - "Alluaudite cathode"
-    - "Na-ion battery cathode"
-  
-  # Secondary/related topics
-  secondary:
-    - "solid electrolyte interphase silicon"
-    - "SEI stabilization silicon anode"
-    - "high capacity anode material"
-    - "conversion reaction battery"
+  primary: []
+  secondary: []
+  # Example:
+  # primary:
+  #   - "machine learning"
+  #   - "deep learning"
+  # secondary:
+  #   - "neural networks"
+  #   - "transformer"
 
 # Search settings
 search:
-  # Publication types to include
-  publication_types:
-    - "JournalArticle"
-    - "Conference"
-  
   # Fields to fetch from API
   fields:
     - "title"
@@ -59,7 +55,7 @@ deduplication:
 # Zotero export settings
 zotero:
   # Target collection name (will be created if not exists)
-  target_collection: "Daily Auto-Import"
+  target_collection: "Literature Crawler"
   
   # Tag all imported papers
   tags:
@@ -72,18 +68,18 @@ zotero:
 # Notification settings
 notification:
   # Bark device key for notifications
-  bark_key: "fQHgYruSejzvDlsGbMlezt"
+  bark_key: ""
   
   # Bark server URL
-  bark_url: "https://bark.deepthinks.org"
+  bark_url: "https://api.day.app"
   
   # Max papers to include in notification detail
   max_detail_papers: 5
 
-# API Keys (fill these in)
+# API Keys (REQUIRED - fill these in)
 api_keys:
   semantic_scholar: ""  # Get from https://www.semanticscholar.org/product/api
   zotero:
-    library_id: "14021209"  # Your Zotero user ID
-    api_key: ""             # Your Zotero API key
-    library_type: "user"    # "user" or "group"
+    library_id: ""        # Your Zotero user ID
+    api_key: ""          # Your Zotero API key
+    library_type: "user" # "user" or "group"

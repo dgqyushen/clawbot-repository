@@ -221,8 +221,12 @@ def main():
     parser = argparse.ArgumentParser(description="Daily literature crawler for Zotero")
     parser.add_argument(
         "--config",
-        default="/root/.openclaw/workspace/projects/zotero-crawler/config/keywords.yaml",
-        help="Path to config file",
+        default="/root/.openclaw/workspace/projects/zotero-crawler/config/template.yaml",
+        help="Path to config file (default: template.yaml). Create topic-specific configs in config/topics/",
+    )
+    parser.add_argument(
+        "--topic",
+        help="Shortcut to use config/topics/{topic}.yaml (e.g., 'battery-research', 'ai-ml')",
     )
     parser.add_argument(
         "--dry-run",
@@ -240,8 +244,18 @@ def main():
     
     args = parser.parse_args()
     
+    # Determine config path
+    if args.topic:
+        config_path = f"/root/.openclaw/workspace/projects/zotero-crawler/config/topics/{args.topic}.yaml"
+        if not Path(config_path).exists():
+            logger.error(f"Topic config not found: {config_path}")
+            logger.info(f"Available topics: {list(Path('/root/.openclaw/workspace/projects/zotero-crawler/config/topics/').glob('*.yaml'))}")
+            sys.exit(1)
+    else:
+        config_path = args.config
+    
     # Load config
-    config = load_config(args.config)
+    config = load_config(config_path)
     
     # Run crawl
     try:

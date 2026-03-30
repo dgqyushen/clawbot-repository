@@ -1,0 +1,46 @@
+# Battery Research - Si-C Anode & Na-ion Topics
+# 
+# Example topic-specific configuration for battery research.
+# Usage:
+#   python scripts/daily_crawl.py --config config/topics/battery-research.yaml
+
+# Inherit from template and override
+keywords:
+  primary:
+    - "silicon-carbon anode"
+    - "Si-C composite anode"
+    - "silicon carbon battery"
+    - "sodium iron sulfate"
+    - "Alluaudite cathode"
+    - "Na-ion battery cathode"
+  
+  secondary:
+    - "solid electrolyte interphase silicon"
+    - "SEI stabilization silicon anode"
+    - "high capacity anode material"
+    - "conversion reaction battery"
+    - "iron-based cathode"
+
+search:
+  max_results_per_keyword: 10
+  sort_by: "publicationDate"
+  min_year: 2020
+
+zotero:
+  target_collection: "Battery Research Auto-Import"
+  tags:
+    - "battery"
+    - "auto-import"
+    - "crawler"
+
+notification:
+  bark_key: "fQHgYruSejzvDlsGbMlezt"
+  bark_url: "https://bark.deepthinks.org"
+  max_detail_papers: 5
+
+api_keys:
+  semantic_scholar: ""  # Fill in your key
+  zotero:
+    library_id: "14021209"
+    api_key: ""  # Fill in your key
+    library_type: "user"
