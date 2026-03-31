@@ -24,9 +24,13 @@ OpenClaw-Battery-Research/
 
 ```bash
 cd /root/.openclaw/workspace/projects/zotero-crawler
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+poetry install
+```
+
+或使用已创建的 venv:
+```bash
+cd /root/.openclaw/workspace/projects/zotero-crawler
+source .venv/bin/activate
 ```
 
 ## 配置
@@ -52,9 +56,14 @@ zotero:
 ### 单次运行
 
 ```bash
-source venv/bin/activate
+# 使用 Poetry
+cd /root/.openclaw/workspace/projects/zotero-crawler
+poetry run python src/daily_run.py
+
+# 或手动激活 venv
+source .venv/bin/activate
 cd src
-python -c "from literature_pipeline import run_pipeline_from_config; run_pipeline_from_config('../config/zotero-crawler.yaml')"
+python daily_run.py
 ```
 
 ### 定时运行（Cron）
@@ -64,7 +73,7 @@ python -c "from literature_pipeline import run_pipeline_from_config; run_pipelin
 ```json
 {
   "schedule": "0 9 * * *",
-  "command": "cd /root/.openclaw/workspace/projects/zotero-crawler && venv/bin/python src/daily_run.py",
+  "command": "cd /root/.openclaw/workspace/projects/zotero-crawler && poetry run python src/daily_run.py",
   "description": "Daily Zotero literature crawl"
 }
 ```
@@ -82,7 +91,8 @@ zotero-crawler/
 │   └── daily_run.py            # CLI 入口
 ├── data/
 │   └── literature-pushed.json  # 去重缓存
-└── requirements.txt
+├── pyproject.toml              # Poetry 配置
+└── .venv/                      # Poetry 虚拟环境
 ```
 
 ## API 限制
