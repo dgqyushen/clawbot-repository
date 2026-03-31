@@ -149,5 +149,112 @@ def main():
     
     return 0
 
+def delete_tagged_items():
+    """Delete all items with auto-crawler tag."""
+    config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'zotero-crawler.yaml')
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+    
+    zotero_config = config.get('zotero', {})
+    library_id = zotero_config.get('library_id')
+    api_key = zotero_config.get('api_key')
+    
+    if not library_id or not api_key:
+        print("❌ Error: Zotero credentials not configured")
+        return 1
+    
+    print(f"🔍 Connecting to Zotero library: {library_id}")
+    zot = pyzotero_lib.Zotero(library_id, 'user', api_key)
+    
+    # Find all items with auto-crawler tag
+    print("\n🏷️  Finding items with 'auto-crawler' tag...")
+    tagged_items = zot.items(tag='auto-crawler')
+    print(f"  Found {len(tagged_items)} items to delete")
+    
+    if not tagged_items:
+        print("  Nothing to delete.")
+        return 0
+    
+    # Show what will be deleted
+    print("\n  Items to delete:")
+    for item in tagged_items[:10]:
+        title = item['data'].get('title', 'No title')[:50]
+        print(f"    - {title}...")
+    if len(tagged_items) > 10:
+        print(f"    ... and {len(tagged_items) - 10} more")
+    
+    # Delete items
+    print(f"\n🗑️  Deleting {len(tagged_items)} items...")
+    deleted = 0
+    errors = 0
+    
+    for item in tagged_items:
+        try:
+            item_key = item['key']
+            zot.delete_item(item)
+            deleted += 1
+            print(f"  ✓ Deleted: {item['data'].get('title', 'No title')[:40]}...")
+        except Exception as e:
+            errors += 1
+            print(f"  ✗ Error deleting item: {e}")
+    
+    print(f"\n✅ Deleted {deleted} items, {errors} errors")
+    return 0
+
+def create_test_collection():
+    """Create a simple test collection."""
+    config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'zotero-crawler.yaml')
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+    
+    zotero_config = config.get('zotero', {})
+    library_id = zotero_config.get('library_id')
+    api_key = zotero_config.get('api_key')
+    
+    if not library_id or not api_key:
+        print("❌ Error: Zotero credentials not configured")
+        return 1
+    
+    print(f"🔍 Connecting to Zotero library: {library_id}")
+    zot = pyzotero_lib.Zotero(library_id, 'user', api_key)
+    
+    # Create test collection
+    collection_name = "OpenClaw-Battery-Research"
+    print(f"\n📁 Creating collection: '{collection_name}'...")
+    
+    # Check if already exists
+    collections = zot.collections()
+    existing = [c for c in collections if c['data']['name'] == collection_name]
+    
+    if existing:
+        print(f"  ⚠️  Collection already exists (key: {existing[0]['key']})")
+        return 0
+    
+    try:
+        template = {'name': collection_name, 'parentCollection': None}
+        response = zot.create_collection([template])
+        
+        if response and 'success' in response:
+            new_key = response['success']['0']
+            print(f"  ✅ Created successfully! Key: {new_key}")
+            return 0
+        else:
+            print(f"  ⚠️  Response: {response}")
+            return 1
+    except Exception as e:
+        print(f"  ❌ Error: {e}")
+        return 1
+
 if __name__ == '__main__':
-    sys.exit(main())
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--delete', action='store_true', help='Delete auto-crawler items')
+    parser.add_argument('--create', action='store_true', help='Create test collection')
+    args = parser.parse_args()
+    
+    if args.delete:
+        sys.exit(delete_tagged_items())
+    elif args.create:
+        sys.exit(create_test_collection())
+    else:
+        sys.exit(main())
