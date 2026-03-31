@@ -1,11 +1,17 @@
-"""Semantic Scholar API client for academic paper search."""
+"""
+Semantic Scholar API Wrapper
+Handles rate limiting, retry logic, and paper metadata extraction.
+Rate limit: 1 request per second (cumulative across all endpoints)
+"""
 
-import httpx
 import time
-from typing import List, Dict, Any, Optional
-from loguru import logger
+import requests
+from typing import List, Dict, Optional, Any
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -13,131 +19,136 @@ class Paper:
     """Represents a paper from Semantic Scholar."""
     paper_id: str
     title: str
+    abstract: Optional[str]
     authors: List[str]
     year: Optional[int]
-    citation_count: int
-    publication_date: Optional[str]
-    journal: Optional[str]
-    abstract: Optional[str]
-    doi: Optional[str]
-    arxiv_id: Optional[str]
+    venue: Optional[str]
     url: Optional[str]
-    open_access_pdf: Optional[str]
-    tldr: Optional[str]  # AI-generated summary
-    fields_of_study: List[str]
+    pdf_url: Optional[str]
+    citation_count: int
+    reference_count: int
+    influential_citation_count: int
+    publication_date: Optional[str]  # YYYY-MM-DD format
     
-    def to_zotero_item(self) -> Dict[str, Any]:
-        """Convert to Zotero item format."""
+    def to_dict(self) -> Dict[str, Any]:
         return {
-            "itemType": "journalArticle",
+            "paper_id": self.paper_id,
             "title": self.title,
-            "creators": [{"creatorType": "author", "name": author} for author in self.authors],
-            "date": str(self.year) if self.year else self.publication_date,
-            "publicationTitle": self.journal,
-            "abstractNote": self.abstract,
-            "DOI": self.doi,
+            "abstract": self.abstract,
+            "authors": self.authors,
+            "year": self.year,
+            "venue": self.venue,
             "url": self.url,
-            "extra": f"Semantic Scholar ID: {self.paper_id}\nCitations: {self.citation_count}",
+            "pdf_url": self.pdf_url,
+            "citation_count": self.citation_count,
+            "reference_count": self.reference_count,
+            "influential_citation_count": self.influential_citation_count,
+            "publication_date": self.publication_date,
         }
 
 
 class SemanticScholarClient:
-    """Client for Semantic Scholar Academic Graph API."""
+    """
+    Semantic Scholar API client with rate limiting.
+    https://api.semanticscholar.org/api-docs/
+    """
     
     BASE_URL = "https://api.semanticscholar.org/graph/v1"
     
-    def __init__(self, api_key: Optional[str] = None, rate_limit: int = 100):
+    # Fields to request - optimized for literature tracking
+    PAPER_FIELDS = [
+        "paperId", "title", "abstract", "authors", "year", "venue",
+        "citationCount", "referenceCount", "influentialCitationCount",
+        "publicationDate", "openAccessPdf", "externalIds"
+    ]
+    
+    def __init__(self, api_key: str, rate_limit_rps: float = 1.0):
         """
         Initialize client.
         
         Args:
-            api_key: Semantic Scholar API key (optional but recommended)
-            rate_limit: Requests per 5 minutes (default 100 for free tier)
+            api_key: Semantic Scholar API key
+            rate_limit_rps: Requests per second limit (default 1 for S2 free tier)
         """
         self.api_key = api_key
-        self.rate_limit = rate_limit
-        self.last_request_time = 0
-        self.min_interval = (5 * 60) / rate_limit  # seconds between requests
+        self.rate_limit_delay = 1.0 / rate_limit_rps
+        self._last_request_time = 0
+        self.session = requests.Session()
+        self.session.headers.update({
+            "x-api-key": api_key,
+            "Accept": "application/json"
+        })
         
-        headers = {}
-        if api_key:
-            headers["x-api-key"] = api_key
-            
-        self.client = httpx.Client(
-            base_url=self.BASE_URL,
-            headers=headers,
-            timeout=30.0
-        )
-        
-        logger.info(f"Semantic Scholar client initialized (rate limit: {rate_limit}/5min)")
-    
-    def _rate_limit(self):
-        """Apply rate limiting between requests."""
-        elapsed = time.time() - self.last_request_time
-        if elapsed < self.min_interval:
-            sleep_time = self.min_interval - elapsed
-            logger.debug(f"Rate limiting: sleeping {sleep_time:.2f}s")
+    def _rate_limited_request(self, method: str, url: str, **kwargs) -> requests.Response:
+        """Execute request with rate limiting."""
+        # Calculate time since last request
+        elapsed = time.time() - self._last_request_time
+        if elapsed < self.rate_limit_delay:
+            sleep_time = self.rate_limit_delay - elapsed
+            logger.debug(f"Rate limit: sleeping {sleep_time:.2f}s")
             time.sleep(sleep_time)
-        self.last_request_time = time.time()
+        
+        try:
+            response = self.session.request(method, url, **kwargs)
+            self._last_request_time = time.time()
+            response.raise_for_status()
+            return response
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 429:
+                logger.warning("Rate limit hit (429), backing off...")
+                time.sleep(5)
+                return self._rate_limited_request(method, url, **kwargs)
+            raise
     
     def search_papers(
-        self,
-        query: str,
-        fields: List[str],
-        limit: int = 10,
-        min_year: Optional[int] = None,
-        sort_by: str = "publicationDate",
+        self, 
+        query: str, 
+        fields: Optional[List[str]] = None,
+        limit: int = 20,
+        publication_date_or_year: Optional[str] = None,
+        sort: str = "relevance"
     ) -> List[Paper]:
         """
-        Search for papers by keyword.
+        Search for papers using Semantic Scholar search API.
         
         Args:
             query: Search query string
-            fields: Fields to retrieve
-            limit: Maximum results
-            min_year: Minimum publication year
-            sort_by: Sort field (citationCount, publicationDate, relevance)
+            fields: Paper fields to return (defaults to PAPER_FIELDS)
+            limit: Max results (max 100)
+            publication_date_or_year: Filter by date range (e.g., "2026-03-01:2026-03-31")
+            sort: Sort order ("relevance" or "publicationDate")
             
         Returns:
             List of Paper objects
         """
-        self._rate_limit()
-        
-        # Build field query string
-        field_string = ",".join(fields)
+        url = f"{self.BASE_URL}/paper/search"
         
         params = {
             "query": query,
-            "fields": field_string,
-            "limit": limit,
-            "sort": sort_by,
+            "fields": ",".join(fields or self.PAPER_FIELDS),
+            "limit": min(limit, 100),
+            "sort": sort
         }
         
-        if min_year:
-            params["minYear"] = min_year
+        if publication_date_or_year:
+            params["publicationDateOrYear"] = publication_date_or_year
         
-        logger.info(f"Searching: '{query}' (limit={limit}, min_year={min_year})")
+        logger.info(f"Searching: '{query}' (limit={limit}, date_filter={publication_date_or_year})")
         
-        try:
-            response = self.client.get("/paper/search", params=params)
-            response.raise_for_status()
-            data = response.json()
-            
-            papers = []
-            for item in data.get("data", []):
-                paper = self._parse_paper(item)
-                if paper:
-                    papers.append(paper)
-            
-            total = data.get("total", 0)
-            logger.info(f"Found {len(papers)} papers (total matches: {total})")
-            return papers
-            
-        except httpx.HTTPError as e:
-            logger.error(f"API request failed: {e}")
-            raise
+        response = self._rate_limited_request("GET", url, params=params)
+        data = response.json()
+        
+        papers = []
+        for item in data.get("data", []):
+            paper = self._parse_paper(item)
+            if paper:
+                papers.append(paper)
+        
+        total = data.get("total", 0)
+        logger.info(f"Found {len(papers)} papers (total available: {total})")
+        return papers
     
-    def _parse_paper(self, data: Dict[str, Any]) -> Optional[Paper]:
+    def _parse_paper(self, data: Dict) -> Optional[Paper]:
         """Parse API response into Paper object."""
         try:
             # Extract authors
@@ -147,61 +158,81 @@ class SemanticScholarClient:
                 if name:
                     authors.append(name)
             
-            # Extract external IDs
-            external_ids = data.get("externalIds", {})
-            doi = external_ids.get("DOI")
-            arxiv_id = external_ids.get("ArXiv")
+            # Extract PDF URL from openAccessPdf
+            pdf_url = None
+            oa_pdf = data.get("openAccessPdf")
+            if oa_pdf and isinstance(oa_pdf, dict):
+                pdf_url = oa_pdf.get("url")
             
-            # Get URL
-            url = data.get("openAccessPdf", {}).get("url") if data.get("openAccessPdf") else None
-            if not url and doi:
-                url = f"https://doi.org/{doi}"
-            
-            # Get TLDR (AI summary)
-            tldr_data = data.get("tldr")
-            tldr = tldr_data.get("text") if isinstance(tldr_data, dict) else None
+            # Build paper URL
+            paper_id = data.get("paperId")
+            url = f"https://www.semanticscholar.org/paper/{paper_id}" if paper_id else None
             
             return Paper(
-                paper_id=data.get("paperId", ""),
-                title=data.get("title", ""),
+                paper_id=paper_id or "unknown",
+                title=data.get("title", "Untitled"),
+                abstract=data.get("abstract"),
                 authors=authors,
                 year=data.get("year"),
-                citation_count=data.get("citationCount", 0),
-                publication_date=data.get("publicationDate"),
-                journal=data.get("journal", {}).get("name") if data.get("journal") else None,
-                abstract=data.get("abstract"),
-                doi=doi,
-                arxiv_id=arxiv_id,
+                venue=data.get("venue"),
                 url=url,
-                open_access_pdf=data.get("openAccessPdf", {}).get("url") if data.get("openAccessPdf") else None,
-                tldr=tldr,
-                fields_of_study=data.get("s2FieldsOfStudy", []),
+                pdf_url=pdf_url,
+                citation_count=data.get("citationCount", 0),
+                reference_count=data.get("referenceCount", 0),
+                influential_citation_count=data.get("influentialCitationCount", 0),
+                publication_date=data.get("publicationDate")
             )
         except Exception as e:
-            logger.warning(f"Failed to parse paper: {e}")
+            logger.error(f"Failed to parse paper: {e}")
             return None
     
-    def get_paper_details(self, paper_id: str, fields: List[str]) -> Optional[Paper]:
-        """Fetch detailed information for a specific paper."""
-        self._rate_limit()
-        
-        field_string = ",".join(fields)
+    def get_paper_details(self, paper_id: str, fields: Optional[List[str]] = None) -> Optional[Paper]:
+        """Get detailed information for a specific paper."""
+        url = f"{self.BASE_URL}/paper/{paper_id}"
+        params = {"fields": ",".join(fields or self.PAPER_FIELDS)}
         
         try:
-            response = self.client.get(f"/paper/{paper_id}", params={"fields": field_string})
-            response.raise_for_status()
+            response = self._rate_limited_request("GET", url, params=params)
             data = response.json()
             return self._parse_paper(data)
-        except httpx.HTTPError as e:
-            logger.error(f"Failed to fetch paper details: {e}")
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"Failed to get paper details for {paper_id}: {e}")
             return None
+
+
+# Convenience function for batch searching multiple keywords
+def search_multiple_keywords(
+    client: SemanticScholarClient,
+    keywords: List[str],
+    days_back: int = 7,
+    limit_per_keyword: int = 20
+) -> Dict[str, List[Paper]]:
+    """
+    Search multiple keywords, return results grouped by keyword.
     
-    def close(self):
-        """Close HTTP client."""
-        self.client.close()
+    Args:
+        client: Initialized SemanticScholarClient
+        keywords: List of search queries
+        days_back: How many days back to search
+        limit_per_keyword: Max results per keyword
+        
+    Returns:
+        Dict mapping keyword to list of Paper objects
+    """
+    results = {}
     
-    def __enter__(self):
-        return self
+    # Build date range
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=days_back)
+    date_range = f"{start_date.strftime('%Y-%m-%d')}:{end_date.strftime('%Y-%m-%d')}"
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
+    for keyword in keywords:
+        papers = client.search_papers(
+            query=keyword,
+            limit=limit_per_keyword,
+            publication_date_or_year=date_range,
+            sort="publicationDate"  # Most recent first
+        )
+        results[keyword] = papers
+    
+    return results

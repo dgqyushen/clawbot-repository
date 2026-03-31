@@ -1,0 +1,133 @@
+# Zotero Literature Crawler Configuration
+# Place this file in the same directory as the scripts or set CONFIG_PATH env var
+
+# Topic-based keyword mapping
+# Each topic has keywords and minimum quality requirements
+topics:
+  si-c-anode:
+    name: "Si-C-Anode"
+    keywords:
+      - "silicon carbon anode"
+      - "Si-C composite"
+      - "silicon carbon battery"
+      - "Si/C anode"
+      - "silicon anode"
+      - "Si/C composite"
+      - "silicon carbon lithium"
+      - "Si-C lithium ion"
+    min_impact_factor: 5.0
+    required_venues: []
+
+# Legacy keywords (for backward compatibility, will be deprecated)
+keywords: []
+
+# Author whitelist (optional) - papers by these authors get priority
+author_whitelist: []
+
+# High-quality journal whitelist (impact factor >= 5 preferred)
+journal_whitelist:
+  # Nature/Science family
+  - "Nature"
+  - "Nature Energy"
+  - "Nature Materials"
+  - "Nature Chemistry"
+  - "Nature Nanotechnology"
+  - "Nature Communications"
+  - "Science"
+  - "Science Advances"
+  - "Joule"
+  - "Matter"
+  - "Cell Reports Physical Science"
+  # Top electrochemistry/energy journals
+  - "Advanced Energy Materials"
+  - "Advanced Functional Materials"
+  - "Advanced Materials"
+  - "Energy & Environmental Science"
+  - "ACS Energy Letters"
+  - "ACS Nano"
+  - "Journal of the American Chemical Society"
+  - "Journal of Materials Chemistry A"
+  - "Chemical Science"
+  - "Chemistry of Materials"
+  - "Materials Horizons"
+  # Top battery-specific journals
+  - "Journal of Power Sources"
+  - "Electrochimica Acta"
+  - "Journal of The Electrochemical Society"
+  - "Batteries & Supercaps"
+  - "Energy Storage Materials"
+  - "Nano Energy"
+  - "Energy Technology"
+  - "Sustainable Energy & Fuels"
+  - "Carbon Energy"
+  # Materials science
+  - "Materials Today"
+  - "Nano Letters"
+  - "ACS Applied Materials & Interfaces"
+  - "Small"
+  - "Small Methods"
+  - "Applied Materials Today"
+  # Engineering/Power
+  - "IEEE Transactions on Power Electronics"
+  - "Applied Energy"
+  - "Renewable and Sustainable Energy Reviews"
+  - "Energy"
+
+# Journal blacklist - skip these venues
+journal_blacklist:
+  - "predatory journal"
+  - "unverified source"
+  - "Journal of Pharmaceutical and Biomedical Analysis"
+  - "Biomedical Materials"
+  - "Acta Scientiarum Polonorum Technologia Alimentaria"
+  - "Proceedings of Universities"
+
+# Quality filters
+quality_filters:
+  # Minimum citation count to consider (for papers older than 1 year)
+  min_citations: 5
+  
+  # Minimum h-index for first author (if available)
+  min_author_hindex: 10
+  
+  # Prefer papers with PDF available
+  require_pdf: false
+  
+  # Minimum paper age (days) to apply citation filter
+  citation_filter_age_days: 365
+
+# Date range for search (days back from today)
+search_days_back: 7
+
+# Results per query (Semantic Scholar max ~100)
+max_results_per_query: 20
+
+# Rate limiting (Semantic Scholar: 1 req/sec)
+rate_limit_rps: 1
+
+# Daily import limit
+# Maximum number of papers to import per day (prioritizes high-quality papers)
+daily_import_limit: 5
+
+# Semantic Scholar API Key
+api_keys:
+  semantic_scholar: "2OucdpP9Ry4rtlJfkhsjWa8mDqRpjSi88Lp2XPVj"
+
+# Zotero Configuration
+zotero:
+  library_id: "14021209"
+  api_key: "1lio7Ai65J0B1wsmBRAXL0ju"
+  main_collection: "OpenClaw-Battery-Research"
+  date_subfolder_format: "%Y-%m-%d"  # Creates subfolders like "2026-03-31"
+  enable_topic_subfolders: true  # Enable topic classification under date folders
+
+# Notification
+notifications:
+  bark_url: "${VAULTWARDEN:zotero-crawler/bark_url}"
+  daily_summary: true
+  paper_count_threshold: 1
+
+# Data persistence
+data_files:
+  dedup_cache: "data/literature-pushed.json"
+  log_file: "data/crawler.log"
