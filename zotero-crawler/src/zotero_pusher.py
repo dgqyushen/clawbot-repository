@@ -168,12 +168,13 @@ class ZoteroPusher:
         
         return date_key
     
-    def paper_to_zotero_item(self, paper) -> Dict[str, Any]:
+    def paper_to_zotero_item(self, paper, auto_imported: bool = True) -> Dict[str, Any]:
         """
         Convert Paper object to Zotero item format.
         
         Args:
             paper: Paper dataclass from semantic_scholar module
+            auto_imported: Whether this was auto-imported by the crawler (adds tags/notes)
             
         Returns:
             Zotero item template (journalArticle type)
@@ -199,6 +200,17 @@ class ZoteroPusher:
                 'lastName': last_name
             })
         
+        # Build extra field with clear auto-import marking
+        import_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        extra_lines = [
+            f"Semantic Scholar ID: {paper.paper_id}",
+            f"Citations: {paper.citation_count}",
+            f"PDF: {paper.pdf_url or 'N/A'}"
+        ]
+        
+        if auto_imported:
+            extra_lines.insert(0, f"[Auto-Imported by OpenClaw Crawler on {import_timestamp}]")
+        
         # Build the item
         item = {
             'itemType': 'journalArticle',
@@ -208,10 +220,16 @@ class ZoteroPusher:
             'date': str(paper.year) if paper.year else paper.publication_date or '',
             'publicationTitle': paper.venue or '',
             'url': paper.url or '',
-            'extra': f"Semantic Scholar ID: {paper.paper_id}\n"
-                     f"Citations: {paper.citation_count}\n"
-                     f"PDF: {paper.pdf_url or 'N/A'}"
+            'extra': '\n'.join(extra_lines),
+            'tags': []
         }
+        
+        # Add auto-import tags for easy filtering
+        if auto_imported:
+            item['tags'] = [
+                {'tag': 'auto-crawler'},
+                {'tag': f'imported-{datetime.now().strftime("%Y-%m-%d")}'}
+            ]
         
         # Add DOI if available in externalIds
         if hasattr(paper, 'external_ids') and paper.external_ids:
@@ -277,6 +295,12 @@ class ZoteroPusher:
                     except Exception as e:
                         logger.warning(f"Could not attach PDF for {paper.title}: {e}")
                 
+                # Add a child note marking this as auto-imported
+                try:
+                    self._add_import_note(item_key, paper)
+                except Exception as e:
+                    logger.warning(f"Could not add import note for {paper.title}: {e}")
+                
                 logger.info(f"Added paper to Zotero: {paper.title[:50]}...")
                 return item_key
             else:
@@ -304,6 +328,34 @@ class ZoteroPusher:
             logger.debug(f"Attached PDF link for: {title}")
         except Exception as e:
             logger.warning(f"Failed to attach PDF link: {e}")
+    
+    def _add_import_note(self, parent_item_key: str, paper):
+        """Add a child note marking this paper as auto-imported by the crawler."""
+        import_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        note_content = (
+            f"<p><b>🤖 Auto-Imported by OpenClaw Crawler</b></p>\n"
+            f"<p>Import time: {import_timestamp}</p>\n"
+            f"<p>Source: Semantic Scholar</p>\n"
+            f"<p>Paper ID: {paper.paper_id}</p>\n"
+            f"<p>Citations: {paper.citation_count}</p>\n"
+            f"<hr/>\n"
+            f"<p><i>This paper was automatically imported by the OpenClaw literature crawler. "
+            f"You can identify auto-imported papers by the tag 'auto-crawler'.</i></p>"
+        )
+        
+        note_item = {
+            'itemType': 'note',
+            'note': note_content,
+            'parentItem': parent_item_key,
+            'tags': [{'tag': 'crawler-note'}]
+        }
+        
+        try:
+            self.zot.create_items([note_item])
+            logger.debug(f"Added import note for: {paper.title}")
+        except Exception as e:
+            logger.warning(f"Failed to add import note: {e}")
     
     def import_papers_for_today(
         self, 
