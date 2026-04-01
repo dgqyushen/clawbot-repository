@@ -1,0 +1,94 @@
+# Si-C Anode Keywords Configuration
+# Used by zotero-crawler for targeted literature search
+# Only Si-C anode related keywords - no sodium-ion or unrelated topics
+
+topic: si-c-anode
+name: "Si-C Anode"
+description: "Silicon-Carbon composite anodes for lithium-ion batteries"
+
+# Primary keywords - must be specific to Si-C anodes
+primary_keywords:
+  - "silicon carbon anode"
+  - "Si-C composite anode" 
+  - "silicon carbon battery"
+  - "Si/C anode"
+  - "silicon anode"
+  - "Si/C composite"
+  - "silicon carbon lithium"
+  - "Si-C lithium ion"
+  - "silicon carbon composite"
+  - "Si-graphite anode"
+
+# Secondary keywords - broader context but still relevant
+secondary_keywords:
+  - "solid electrolyte interphase silicon"
+  - "SEI stabilization silicon anode"
+  - "silicon nanowire anode"
+  - "porous silicon anode"
+  - "silicon nanoparticle anode"
+  - "silicon thin film anode"
+
+# Excluded keywords - explicitly filter out unrelated topics
+excluded_keywords:
+  - "sodium"  # Na-ion batteries
+  - "sodium-ion"  # Na-ion batteries
+  - "sodium ion"
+  - "Na-ion" 
+  - "Na ion"
+  - "potassium"  # K-ion batteries
+  - "potassium ion"
+  - "aluminum ion"  # Al-ion batteries
+  - "magnesium"  # Mg-ion batteries
+  - "calcium"  # Ca-ion batteries
+  - "Alluaudite"  # Na-ion cathode material
+  - "Prussian white"  # Na-ion cathode
+  - "iron sulfate"  # Na-ion related
+  - "thermal management"  # Not material-specific
+  - "battery management system"  # BMS, not materials
+  - "state of charge"  # SOC estimation
+  - "state of health"  # SOH estimation
+  - "tetracycline"  # Pharmaceutical
+  - "degradation"  # Environmental, not battery
+  - "wastewater"  # Environmental
+  - "electrocatalytic"  # Catalysis, not batteries
+  - "ROS generation"  # Reactive oxygen species
+  - "chlorinated byproducts"  # Environmental chemistry
+
+# Minimum quality requirements - 顶刊标准
+min_impact_factor: 15.0
+required_venues: []
+
+# 二区及以下期刊黑名单 - 明确排除
+excluded_venues:
+  - "Journal of Power Sources"  # 二区
+  - "Electrochimica Acta"  # 二区/三区
+  - "Journal of The Electrochemical Society"  # 二区
+  - "Journal of Energy Storage"  # 二区/三区
+  - "Batteries & Supercaps"  # 三区
+  - "Energy Technology"  # 二区
+  - "Sustainable Energy & Fuels"  # 二区
+  - "Carbon Energy"  # 新兴二区
+  - "ACS Applied Materials & Interfaces"  # 二区
+  - "Small"  # 二区
+  - "Small Methods"  # 二区
+  - "Applied Materials Today"  # 二区/三区
+  - "Applied Energy"  # 二区
+  - "Renewable and Sustainable Energy Reviews"  # 二区
+  - "Energy"  # 二区/三区
+  - "IEEE Transactions on Power Electronics"
+  - "International Journal of Energy Research"
+  - "Journal of Cleaner Production"
+  - "Science of The Total Environment"
+  - "Chemosphere"
+  - "Journal of Environmental Chemical Engineering"
+  - "Electrochimica Acta"
+
+# Semantic Scholar search settings
+search:
+  max_results_per_keyword: 20
+  sort_by: "publicationDate"
+  min_year: 2020
+  days_back: 7
+
+# Rate limiting (Semantic Scholar: 1 req/sec)
+rate_limit_rps: 1.0

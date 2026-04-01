@@ -24,54 +24,45 @@ keywords: []
 # Author whitelist (optional) - papers by these authors get priority
 author_whitelist: []
 
-# High-quality journal whitelist (impact factor >= 5 preferred)
+# High-quality journal whitelist - 只保留材料/能源领域顶级一区期刊
 journal_whitelist:
-  # Nature/Science family
+  # Nature/Science 家族 (IF >20)
   - "Nature"
-  - "Nature Energy"
-  - "Nature Materials"
+  - "Nature Energy"  # IF ~50
+  - "Nature Materials"  # IF ~40
   - "Nature Chemistry"
   - "Nature Nanotechnology"
-  - "Nature Communications"
+  - "Nature Catalysis"
+  - "Nature Electronics"
+  - "Nature Reviews Materials"  # IF ~70
+  - "Nature Communications"  # 一区但质量参差，谨慎
   - "Science"
   - "Science Advances"
-  - "Joule"
-  - "Matter"
+  - "Joule"  # Cell 子刊 IF ~40
+  - "Matter"  # Cell 子刊
   - "Cell Reports Physical Science"
-  # Top electrochemistry/energy journals
-  - "Advanced Energy Materials"
-  - "Advanced Functional Materials"
-  - "Advanced Materials"
-  - "Energy & Environmental Science"
-  - "ACS Energy Letters"
-  - "ACS Nano"
-  - "Journal of the American Chemical Society"
-  - "Journal of Materials Chemistry A"
-  - "Chemical Science"
-  - "Chemistry of Materials"
-  - "Materials Horizons"
-  # Top battery-specific journals
-  - "Journal of Power Sources"
-  - "Electrochimica Acta"
-  - "Journal of The Electrochemical Society"
-  - "Batteries & Supercaps"
-  - "Energy Storage Materials"
-  - "Nano Energy"
-  - "Energy Technology"
-  - "Sustainable Energy & Fuels"
-  - "Carbon Energy"
-  # Materials science
-  - "Materials Today"
-  - "Nano Letters"
-  - "ACS Applied Materials & Interfaces"
-  - "Small"
-  - "Small Methods"
-  - "Applied Materials Today"
-  # Engineering/Power
-  - "IEEE Transactions on Power Electronics"
-  - "Applied Energy"
-  - "Renewable and Sustainable Energy Reviews"
-  - "Energy"
+  - "Chem"
+  # 材料科学顶刊 (IF >15)
+  - "Advanced Materials"  # IF ~30
+  - "Advanced Energy Materials"  # IF ~25
+  - "Advanced Functional Materials"  # IF ~18
+  - "ACS Nano"  # IF ~15
+  - "Nano Letters"  # IF ~10，纳米顶刊
+  - "Materials Horizons"  # IF ~12
+  # 化学顶刊 (IF >10)
+  - "Journal of the American Chemical Society"  # IF ~15
+  - "Angewandte Chemie"  # IF ~15
+  - "Energy & Environmental Science"  # IF ~30
+  - "ACS Energy Letters"  # IF ~20
+  # 能源存储专业顶刊
+  - "Nano Energy"  # IF ~17
+  - "Energy Storage Materials"  # IF ~18
+  # 材料化学顶刊
+  - "Chemistry of Materials"  # IF ~8，但材料化学权威
+  - "Journal of Materials Chemistry A"  # IF ~10
+  # 顶级综述
+  - "Progress in Materials Science"  # IF ~40
+  - "Materials Science & Engineering: R"  # IF ~30
 
 # Journal blacklist - skip these venues
 journal_blacklist:

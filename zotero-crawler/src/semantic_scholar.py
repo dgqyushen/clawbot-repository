@@ -29,6 +29,20 @@ class Paper:
     reference_count: int
     influential_citation_count: int
     publication_date: Optional[str]  # YYYY-MM-DD format
+    doi: Optional[str] = None
+    fields_of_study: Optional[List[str]] = None
+    tldr: Optional[str] = None
+    
+    # Alias for database compatibility
+    @property
+    def journal(self) -> Optional[str]:
+        """Alias for venue (database compatibility)."""
+        return self.venue
+    
+    @property
+    def open_access_pdf(self) -> Optional[str]:
+        """Alias for pdf_url (database compatibility)."""
+        return self.pdf_url
     
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -44,6 +58,9 @@ class Paper:
             "reference_count": self.reference_count,
             "influential_citation_count": self.influential_citation_count,
             "publication_date": self.publication_date,
+            "doi": self.doi,
+            "fields_of_study": self.fields_of_study,
+            "tldr": self.tldr,
         }
 
 
@@ -59,7 +76,8 @@ class SemanticScholarClient:
     PAPER_FIELDS = [
         "paperId", "title", "abstract", "authors", "year", "venue",
         "citationCount", "referenceCount", "influentialCitationCount",
-        "publicationDate", "openAccessPdf", "externalIds"
+        "publicationDate", "openAccessPdf", "externalIds",
+        "fieldsOfStudy", "tldr"  # ADDED: New fields
     ]
     
     def __init__(self, api_key: str, rate_limit_rps: float = 1.0):
@@ -168,6 +186,23 @@ class SemanticScholarClient:
             paper_id = data.get("paperId")
             url = f"https://www.semanticscholar.org/paper/{paper_id}" if paper_id else None
             
+            # Extract DOI from externalIds
+            doi = None
+            external_ids = data.get("externalIds", {})
+            if external_ids and isinstance(external_ids, dict):
+                doi = external_ids.get("DOI")
+            
+            # Extract fields of study
+            fields_of_study = data.get("fieldsOfStudy", [])
+            if not isinstance(fields_of_study, list):
+                fields_of_study = []
+            
+            # Extract TLDR
+            tldr = None
+            tldr_obj = data.get("tldr")
+            if tldr_obj and isinstance(tldr_obj, dict):
+                tldr = tldr_obj.get("text")
+            
             return Paper(
                 paper_id=paper_id or "unknown",
                 title=data.get("title", "Untitled"),
@@ -180,7 +215,10 @@ class SemanticScholarClient:
                 citation_count=data.get("citationCount", 0),
                 reference_count=data.get("referenceCount", 0),
                 influential_citation_count=data.get("influentialCitationCount", 0),
-                publication_date=data.get("publicationDate")
+                publication_date=data.get("publicationDate"),
+                doi=doi,
+                fields_of_study=fields_of_study,
+                tldr=tldr
             )
         except Exception as e:
             logger.error(f"Failed to parse paper: {e}")

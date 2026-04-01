@@ -39,7 +39,7 @@ def main():
             print("="*50)
         
         # Exit code based on success
-        imported_count = results.get('imported', {}).get('successful', 0)
+        imported_count = results.get('imported_count', 0)
         if imported_count > 0:
             logger.info(f"Successfully imported {imported_count} papers")
             sys.exit(0)

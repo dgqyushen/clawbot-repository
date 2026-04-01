@@ -1,0 +1,45 @@
+# Top-Tier Journal Whitelist - 只收录材料/能源领域顶级一区期刊
+# 标准: Nature/Science 子刊 + 影响因子 >15 的顶级专业期刊
+# 排除: 二区及以下期刊
+
+# Nature/Science 家族 (顶级综合/能源/材料)
+- "Nature"
+- "Nature Energy"  # IF ~50
+- "Nature Materials"  # IF ~40
+- "Nature Chemistry"
+- "Nature Nanotechnology"
+- "Nature Catalysis"
+- "Nature Electronics"
+- "Nature Reviews Materials"  # IF ~70
+- "Nature Sustainability"
+- "Nature Communications"  # 虽然一区但质量参差，谨慎收录
+- "Science"
+- "Science Advances"
+- "Joule"  # Cell 子刊，能源顶刊 IF ~40
+- "Matter"  # Cell 子刊，材料
+- "Cell Reports Physical Science"  # Cell 子刊
+- "Chem"  # Cell 子刊，化学顶刊
+
+# 能源存储/电池顶级期刊 (IF >15)
+- "Advanced Energy Materials"  # IF ~25
+- "Energy & Environmental Science"  # IF ~30
+- "ACS Energy Letters"  # IF ~20
+- "Nano Energy"  # IF ~17
+- "Energy Storage Materials"  # IF ~18
+
+# 材料科学顶级期刊 (IF >15)
+- "Advanced Materials"  # IF ~30
+- "Advanced Functional Materials"  # IF ~18
+- "ACS Nano"  # IF ~15
+- "Nano Letters"  # IF ~10，但纳米领域顶刊
+- "Materials Horizons"  # RSC 顶刊 IF ~12
+
+# 化学/电化学顶级期刊 (IF >10)
+- "Journal of the American Chemical Society"  # IF ~15
+- "Angewandte Chemie"  # IF ~15
+- "Chemistry of Materials"  # IF ~8，但材料化学顶刊
+- "Journal of Materials Chemistry A"  # IF ~10
+
+# 环境与可持续能源综述顶刊
+- "Progress in Materials Science"  # IF ~40
+- "Materials Science & Engineering: R: Reports"  # IF ~30
