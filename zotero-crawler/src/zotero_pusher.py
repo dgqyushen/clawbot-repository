@@ -212,12 +212,18 @@ class ZoteroPusher:
             extra_lines.insert(0, f"[Auto-Imported by OpenClaw Crawler on {import_timestamp}]")
         
         # Build the item
+        # Use full publication date if available, otherwise year
+        date_str = paper.publication_date or (str(paper.year) if paper.year else '')
+        
+        # Use abstract, or tldr as fallback, or empty
+        abstract = paper.abstract or paper.tldr or ''
+        
         item = {
             'itemType': 'journalArticle',
             'title': paper.title,
-            'abstractNote': paper.abstract or '',
+            'abstractNote': abstract,
             'creators': creators,
-            'date': str(paper.year) if paper.year else paper.publication_date or '',
+            'date': date_str,
             'publicationTitle': paper.venue or '',
             'url': paper.url or '',
             'extra': '\n'.join(extra_lines),
@@ -231,11 +237,9 @@ class ZoteroPusher:
                 {'tag': f'imported-{datetime.now().strftime("%Y-%m-%d")}'}
             ]
         
-        # Add DOI if available in externalIds
-        if hasattr(paper, 'external_ids') and paper.external_ids:
-            doi = paper.external_ids.get('DOI')
-            if doi:
-                item['DOI'] = doi
+        # Add DOI if available
+        if paper.doi:
+            item['DOI'] = paper.doi
         
         return item
     

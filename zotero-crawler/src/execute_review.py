@@ -106,7 +106,7 @@ def execute_import(review_path: str, config_path: str = "config/zotero-crawler.y
             influential_citation_count=0,  # Not stored in review
             pdf_url=paper_data.get('pdf_url'),
             url=f"https://semanticscholar.org/paper/{paper_data['paper_id']}",
-            doi=None,
+            doi=paper_data.get('doi'),  # ADDED: Get DOI from review data
             fields_of_study=[],
             tldr=None
         )
