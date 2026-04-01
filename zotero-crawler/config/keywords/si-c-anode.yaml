@@ -30,31 +30,80 @@ secondary_keywords:
 
 # Excluded keywords - explicitly filter out unrelated topics
 excluded_keywords:
-  - "sodium"  # Na-ion batteries
-  - "sodium-ion"  # Na-ion batteries
+  # 其他电池体系
+  - "sodium"  
+  - "sodium-ion"
   - "sodium ion"
   - "Na-ion" 
   - "Na ion"
-  - "potassium"  # K-ion batteries
+  - "potassium"
   - "potassium ion"
-  - "aluminum ion"  # Al-ion batteries
-  - "magnesium"  # Mg-ion batteries
-  - "calcium"  # Ca-ion batteries
-  - "Alluaudite"  # Na-ion cathode material
-  - "Prussian white"  # Na-ion cathode
-  - "iron sulfate"  # Na-ion related
-  - "thermal management"  # Not material-specific
-  - "battery management system"  # BMS, not materials
-  - "state of charge"  # SOC estimation
-  - "state of health"  # SOH estimation
-  - "tetracycline"  # Pharmaceutical
-  - "degradation"  # Environmental, not battery
-  - "wastewater"  # Environmental
-  - "electrocatalytic"  # Catalysis, not batteries
-  - "ROS generation"  # Reactive oxygen species
-  - "chlorinated byproducts"  # Environmental chemistry
-
-# Minimum quality requirements - 放宽到IF>7
+  - "aluminum ion"
+  - "magnesium"
+  - "calcium"
+  - "Alluaudite"
+  - "Prussian white"
+  - "iron sulfate"
+  # 环境电化学（使用阳极做降解）
+  - "tetracycline"
+  - "degradation"
+  - "wastewater"
+  - "pollutant"
+  - "contaminant"
+  - "electrocatalytic degradation"
+  - "electrochemical oxidation"
+  - "advanced oxidation"
+  - "chlorinated byproducts"
+  - "disinfection"
+  - "organic pollutant"
+  - "pharmaceutical"
+  - "antibiotic"
+  - "dye"
+  - "ROS generation"
+  - "reactive oxygen species"
+  - "electro-Fenton"
+  # 电池管理系统/热管理（非材料研究）
+  - "thermal management"
+  - "battery thermal"
+  - "cooling system"
+  - "heat dissipation"
+  - "battery management system"
+  - "state of charge"
+  - "state of health"
+  - "SOC estimation"
+  - "SOH estimation"
+  # 其他无关领域
+  - "electrocatalytic"
+  - "hydrogen evolution"
+  - "oxygen evolution"
+  - "water splitting"
+  - "CO2 reduction"
+  - "nitrogen reduction"
+  - "fuel cell"
+  - "supercapacitor"
+  # 非硅碳负极材料（明确排除锌、钨、锡氧化物等）
+  - "zinc"
+  - "zinc-ion"
+  - "zinc anode"
+  - "tungsten"
+  - "tin oxide"
+  - "SnO"
+  - "TiO2"
+  - "iron oxide"
+  - "Fe3O4"
+  - "cobalt"
+  - "Co3O4"
+  - "nickel"
+  - "manganese"
+  - "MnO"
+  - "MnO2"
+  - "vanadium"
+  - "molybdenum"
+  - "MoS2"
+  - "graphite anode"
+  - "hard carbon"
+  - "soft carbon"
+  - "graphene anode" - 放宽到IF>7
 min_impact_factor: 7.0
 required_venues: []
 
@@ -77,6 +126,23 @@ search:
   sort_by: "publicationDate"
   min_year: 2020
   days_back: 7
+  # 严格模式: 只搜索必须同时包含silicon和anode的精确短语
+  strict_mode: true
+  # 要求论文标题/摘要必须同时包含以下词汇组合
+  required_combinations:
+    - ["silicon", "anode"]
+    - ["silicon", "carbon"]
+    - ["Si", "C"]
+    - ["Si-C", "battery"]
+  # 排除标题中含有这些词的论文
+  title_excluded:
+    - "tetracycline"
+    - "degradation"
+    - "wastewater"
+    - "pollutant"
+    - "thermal management"
+    - "cooling"
+    - "supercapacitor"
 
 # Rate limiting (Semantic Scholar: 1 req/sec)
 rate_limit_rps: 1.0

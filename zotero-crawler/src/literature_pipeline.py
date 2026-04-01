@@ -107,18 +107,20 @@ class TopicClassifier:
 
 
 class QualityFilter:
-    """Filters papers based on journal quality and citation metrics."""
+    """Filters papers based on journal quality, citation metrics, and content keywords."""
     
     def __init__(
         self,
         journal_whitelist: Optional[List[str]] = None,
         journal_blacklist: Optional[List[str]] = None,
+        excluded_keywords: Optional[List[str]] = None,  # ADDED
         min_citations: int = 0,
         citation_filter_age_days: int = 365,
         require_pdf: bool = False
     ):
         self.journal_whitelist = [j.lower() for j in (journal_whitelist or [])]
         self.journal_blacklist = [j.lower() for j in (journal_blacklist or [])]
+        self.excluded_keywords = [k.lower() for k in (excluded_keywords or [])]  # ADDED
         self.min_citations = min_citations
         self.citation_filter_age_days = citation_filter_age_days
         self.require_pdf = require_pdf
@@ -158,6 +160,15 @@ class QualityFilter:
     
     def matches(self, paper: Paper) -> bool:
         """Check if paper passes quality filters."""
+        # KEYWORD FILTER: Check title and abstract for excluded keywords
+        if self.excluded_keywords:
+            text_to_check = (paper.title or "") + " " + (paper.abstract or "")
+            text_lower = text_to_check.lower()
+            for keyword in self.excluded_keywords:
+                if keyword in text_lower:
+                    logger.debug(f"Paper '{paper.title[:50]}...' filtered: excluded keyword '{keyword}'")
+                    return False
+        
         # Venue quality check
         if not self.is_quality_venue(paper.venue):
             logger.debug(f"Paper '{paper.title[:50]}...' filtered: low quality venue '{paper.venue}'")
@@ -188,6 +199,7 @@ class LiteraturePipeline:
     """
     Main pipeline orchestrating literature search, filtering, and Zotero import.
     Supports topic-based classification and quality filtering.
+    NEW: AI review layer before import
     """
     
     def __init__(
@@ -228,16 +240,21 @@ class LiteraturePipeline:
         
         # Merge journal_blacklist with excluded_venues from topics
         journal_blacklist = config.get('journal_blacklist', [])
+        excluded_keywords = []  # ADDED: Collect excluded keywords from all topics
         for topic_id, topic_config in self.topics.items():
             excluded_venues = topic_config.get('excluded_venues', [])
             journal_blacklist.extend(excluded_venues)
+            # ADDED: Collect excluded keywords
+            topic_excluded_keywords = topic_config.get('excluded_keywords', [])
+            excluded_keywords.extend(topic_excluded_keywords)
         
         journal_whitelist = config.get('journal_whitelist', [])
-        logger.info(f"QualityFilter: whitelist={len(journal_whitelist)} journals, blacklist={len(journal_blacklist)} journals")
+        logger.info(f"QualityFilter: whitelist={len(journal_whitelist)} journals, blacklist={len(journal_blacklist)} journals, excluded_keywords={len(excluded_keywords)}")
         
         self.quality_filter = QualityFilter(
             journal_whitelist=journal_whitelist,
             journal_blacklist=list(set(journal_blacklist)) if journal_blacklist else None,  # Remove duplicates
+            excluded_keywords=list(set(excluded_keywords)) if excluded_keywords else None,  # ADDED
             min_citations=quality_config.get('min_citations', 0),
             citation_filter_age_days=quality_config.get('citation_filter_age_days', 365),
             require_pdf=quality_config.get('require_pdf', False)
@@ -390,6 +407,22 @@ class LiteraturePipeline:
         if skipped_due_to_limit > 0:
             logger.info(f"Daily limit applied: importing top {len(papers_to_import)} papers, skipping {skipped_due_to_limit} lower-quality papers")
         
+        # NEW Step 5.5: AI Review Layer - Pause for human/AI review before import
+        if papers_to_import:
+            logger.info("=" * 60)
+            logger.info("🤖 AI REVIEW: Please review papers before import")
+            logger.info("=" * 60)
+            self._generate_review_file(papers_to_import, paper_topics, today_str, results)
+            # Return early with papers pending review
+            results['status'] = 'pending_review'
+            results['pending_import_count'] = len(papers_to_import)
+            logger.info("Review file generated. Please confirm import.")
+            return results
+        
+        # If no review needed (empty list), continue to import
+        results['status'] = 'no_papers'
+        return results
+        
         # Step 6: Import to Zotero with topic classification
         imported_count = 0
         topic_stats = {tid: 0 for tid in self.topics.keys()}
@@ -478,6 +511,103 @@ class LiteraturePipeline:
                     lines.append(f"    {paper.venue} ({paper.year})")
         
         return "\n".join(lines)
+    
+    def _generate_review_file(self, papers: List[Paper], paper_topics: Dict, date_str: str, results: Dict) -> str:
+        """Generate a review file for AI/human review before import."""
+        import json
+        from pathlib import Path
+        from datetime import datetime
+        
+        review_dir = Path("data/reviews")
+        review_dir.mkdir(parents=True, exist_ok=True)
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        review_file = review_dir / f"review_{date_str}_{timestamp}.json"
+        
+        review_data = {
+            "timestamp": datetime.now().isoformat(),
+            "date": date_str,
+            "total_papers": len(papers),
+            "papers": []
+        }
+        
+        for i, paper in enumerate(papers, 1):
+            topics = paper_topics.get(paper.paper_id, [])
+            paper_data = {
+                "index": i,
+                "paper_id": paper.paper_id,
+                "title": paper.title,
+                "abstract": paper.abstract,
+                "authors": paper.authors,
+                "venue": paper.venue,
+                "year": paper.year,
+                "publication_date": paper.publication_date,
+                "citation_count": paper.citation_count,
+                "pdf_url": paper.pdf_url,
+                "topics": topics,
+                "proposed_import": True,
+                "ai_recommendation": "pending",
+                "ai_reasoning": ""
+            }
+            review_data["papers"].append(paper_data)
+        
+        # Also generate a human-readable markdown version
+        md_file = review_dir / f"review_{date_str}_{timestamp}.md"
+        md_lines = [
+            f"# Literature Review - {date_str}",
+            f"Generated: {datetime.now().isoformat()}",
+            f"Total papers to review: {len(papers)}",
+            "",
+            "## Instructions",
+            "1. Review each paper below",
+            "2. Edit the JSON file to mark papers for import:",
+            "   - Set `\"proposed_import\": true` to import",
+            "   - Set `\"proposed_import\": false` to skip",
+            "3. Save the JSON file",
+            "4. Run: `python src/execute_review.py {review_file}` to import approved papers",
+            "",
+            "---",
+            ""
+        ]
+        
+        for paper_data in review_data["papers"]:
+            md_lines.extend([
+                f"### [{paper_data['index']}] {paper_data['title']}",
+                f"- **Authors**: {', '.join(paper_data['authors'][:3])}{' et al.' if len(paper_data['authors']) > 3 else ''}",
+                f"- **Journal**: {paper_data['venue']} ({paper_data['year']})",
+                f"- **Citations**: {paper_data['citation_count']}",
+                f"- **PDF**: {'Available' if paper_data['pdf_url'] else 'Not available'}",
+                "",
+                "**Abstract:**",
+                f"> {paper_data['abstract'][:300]}..." if paper_data['abstract'] else "> No abstract available",
+                "",
+                "**AI Assessment:**",
+                "- [ ] Relevant to Si-C anode research",
+                "- [ ] Not sodium-ion or other chemistry",
+                "- [ ] Not environmental/catalysis paper",
+                "- [ ] Worth importing",
+                "",
+                f"**Decision**: `proposed_import`: {str(paper_data['proposed_import']).lower()}",
+                "",
+                "---",
+                ""
+            ])
+        
+        # Save both files
+        with open(review_file, 'w', encoding='utf-8') as f:
+            json.dump(review_data, f, indent=2, ensure_ascii=False)
+        
+        with open(md_file, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(md_lines))
+        
+        logger.info(f"Review files generated:")
+        logger.info(f"  - JSON: {review_file}")
+        logger.info(f"  - Markdown: {md_file}")
+        
+        results['review_file'] = str(review_file)
+        results['review_md'] = str(md_file)
+        
+        return str(review_file)
 
 
 def run_pipeline_from_config(config_path: str) -> Dict[str, Any]:
