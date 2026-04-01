@@ -54,34 +54,22 @@ excluded_keywords:
   - "ROS generation"  # Reactive oxygen species
   - "chlorinated byproducts"  # Environmental chemistry
 
-# Minimum quality requirements - 顶刊标准
-min_impact_factor: 15.0
+# Minimum quality requirements - 放宽到IF>7
+min_impact_factor: 7.0
 required_venues: []
 
-# 二区及以下期刊黑名单 - 明确排除
+# 期刊白名单文件路径（使用扩展白名单，包含二区优质期刊）
+whitelist_file: "config/keywords/journal-whitelist-extended.yaml"
+
+# 排除的期刊 - 仅排除明显不相关的领域
 excluded_venues:
-  - "Journal of Power Sources"  # 二区
-  - "Electrochimica Acta"  # 二区/三区
-  - "Journal of The Electrochemical Society"  # 二区
-  - "Journal of Energy Storage"  # 二区/三区
-  - "Batteries & Supercaps"  # 三区
-  - "Energy Technology"  # 二区
-  - "Sustainable Energy & Fuels"  # 二区
-  - "Carbon Energy"  # 新兴二区
-  - "ACS Applied Materials & Interfaces"  # 二区
-  - "Small"  # 二区
-  - "Small Methods"  # 二区
-  - "Applied Materials Today"  # 二区/三区
-  - "Applied Energy"  # 二区
-  - "Renewable and Sustainable Energy Reviews"  # 二区
-  - "Energy"  # 二区/三区
-  - "IEEE Transactions on Power Electronics"
-  - "International Journal of Energy Research"
-  - "Journal of Cleaner Production"
-  - "Science of The Total Environment"
-  - "Chemosphere"
-  - "Journal of Environmental Chemical Engineering"
-  - "Electrochimica Acta"
+  - "IEEE Transactions on Power Electronics"  # 偏工程/电力电子
+  - "International Journal of Energy Research"  # 偏工程
+  - "Science of The Total Environment"  # 偏环境科学
+  - "Chemosphere"  # 环境化学
+  - "Journal of Environmental Chemical Engineering"  # 环境工程
+  - "Tetracycline"  # 药物
+  - "Water Research"  # 水处理
 
 # Semantic Scholar search settings
 search:

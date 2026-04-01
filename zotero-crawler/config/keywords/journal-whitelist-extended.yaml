@@ -1,0 +1,67 @@
+# 扩展期刊白名单 - 包含顶刊(IF>15)和二区优质期刊(IF>7)
+# 用于 Si-C 负极文献追踪，平衡质量与覆盖率
+
+# ========== 第一梯队：Nature/Science 家族 (顶级综合/能源/材料) ==========
+- "Nature"
+- "Nature Energy"                    # IF ~50
+- "Nature Materials"                 # IF ~40
+- "Nature Chemistry"                 # IF ~17
+- "Nature Nanotechnology"            # IF ~38
+- "Nature Catalysis"                 # IF ~40
+- "Nature Electronics"               # IF ~33
+- "Nature Reviews Materials"         # IF ~70
+- "Nature Sustainability"            # IF ~25
+- "Nature Communications"            # IF ~14-16
+- "Science"
+- "Science Advances"                 # IF ~14
+- "Joule"                            # Cell 子刊，IF ~40
+- "Matter"                           # Cell 子刊，IF ~8
+- "Cell Reports Physical Science"    # IF ~8
+- "Chem"                             # Cell 子刊，IF ~25
+
+# ========== 第二梯队：能源存储/电池顶刊 (IF >15) ==========
+- "Advanced Energy Materials"        # IF ~25
+- "Energy & Environmental Science"   # IF ~30
+- "ACS Energy Letters"               # IF ~20
+- "Nano Energy"                      # IF ~17
+- "Energy Storage Materials"         # IF ~18
+
+# ========== 第三梯队：材料科学顶刊 (IF >10) ==========
+- "Advanced Materials"               # IF ~30
+- "Advanced Functional Materials"    # IF ~18
+- "ACS Nano"                         # IF ~15
+- "Nano Letters"                     # IF ~10
+- "Materials Horizons"               # IF ~12
+- "Small"                            # IF ~13
+- "Small Methods"                    # IF ~12
+- "ACS Applied Materials & Interfaces" # IF ~9
+
+# ========== 第四梯队：化学/电化学期刊 (IF >7) ==========
+- "Journal of the American Chemical Society"  # IF ~15
+- "Angewandte Chemie"                       # IF ~15
+- "Chemistry of Materials"                  # IF ~8
+- "Journal of Materials Chemistry A"          # IF ~10
+- "Chemical Engineering Journal"            # IF ~15
+- "Electrochimica Acta"                     # IF ~6-7
+
+# ========== 第五梯队：电池/能源二区优质期刊 (IF >7) ==========
+- "Journal of Power Sources"                # IF ~9-10
+- "Journal of Energy Storage"               # IF ~8-9
+- "Batteries & Supercaps"                   # IF ~6-7
+- "Energy Technology"                       # IF ~6-7
+- "Sustainable Energy & Fuels"              # IF ~6-7
+- "Carbon Energy"                           # IF ~8
+- "Applied Energy"                          # IF ~10
+- "Renewable and Sustainable Energy Reviews" # IF ~16
+- "Journal of Cleaner Production"           # IF ~11
+- "Chemical Engineering Journal"            # IF ~15
+
+# ========== 第六梯队：物理/纳米/跨学科期刊 ==========
+- "ACS Applied Nano Materials"              # IF ~5-6
+- "ACS Applied Energy Materials"            # IF ~6-7
+- "Nanoscale"                              # IF ~5-6
+- "Nanomaterials"                           # IF ~4-5
+- "Nanotechnology"                        # IF ~3-4
+- "Applied Materials Today"                 # IF ~6-8
+- "Materials Today"                         # IF ~21
+- "Materials Today Energy"                  # IF ~8-10

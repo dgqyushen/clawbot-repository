@@ -15,7 +15,7 @@ topics:
       - "Si/C composite"
       - "silicon carbon lithium"
       - "Si-C lithium ion"
-    min_impact_factor: 5.0
+    min_impact_factor: 7.0  # 放宽到IF>7
     required_venues: []
 
 # Legacy keywords (for backward compatibility, will be deprecated)
@@ -24,7 +24,7 @@ keywords: []
 # Author whitelist (optional) - papers by these authors get priority
 author_whitelist: []
 
-# High-quality journal whitelist - 只保留材料/能源领域顶级一区期刊
+# High-quality journal whitelist - 包含顶刊(IF>15)和二区优质期刊(IF>7-15)
 journal_whitelist:
   # Nature/Science 家族 (IF >20)
   - "Nature"
@@ -63,6 +63,35 @@ journal_whitelist:
   # 顶级综述
   - "Progress in Materials Science"  # IF ~40
   - "Materials Science & Engineering: R"  # IF ~30
+  # ========== 扩展：二区优质期刊 (IF 7-15) ==========
+  # 能源存储/电池期刊
+  - "Journal of Power Sources"              # IF ~9-10
+  - "Journal of Energy Storage"               # IF ~8-9
+  - "Journal of The Electrochemical Society"  # IF ~3-4
+  - "Batteries & Supercaps"                   # IF ~6-7
+  - "Energy Technology"                       # IF ~6-7
+  - "Sustainable Energy & Fuels"              # IF ~6-7
+  - "Carbon Energy"                           # IF ~8
+  - "Chemical Engineering Journal"            # IF ~15
+  - "Applied Energy"                          # IF ~10
+  - "Renewable and Sustainable Energy Reviews" # IF ~16
+  - "Journal of Cleaner Production"           # IF ~11
+  - "Electrochimica Acta"                     # IF ~6-7
+  # 材料/纳米应用期刊
+  - "Small"                                   # IF ~13
+  - "Small Methods"                           # IF ~12
+  - "ACS Applied Materials & Interfaces"      # IF ~9
+  - "ACS Applied Nano Materials"              # IF ~6
+  - "ACS Applied Energy Materials"            # IF ~7
+  - "Nanoscale"                              # IF ~5-6
+  - "Nanomaterials"                           # IF ~5
+  - "Nanotechnology"                        # IF ~3-4
+  - "Applied Materials Today"                 # IF ~6-8
+  - "Materials Today Energy"                  # IF ~8-10
+  # 物理/跨学科期刊
+  - "2D Materials"
+  - "npj Computational Materials"             # IF ~10
+  - "Scientific Reports"                      # IF ~4
 
 # Journal blacklist - skip these venues
 journal_blacklist:
