@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "quant-backtest"
+version = "0.1.0"
+description = "EMA crossover strategy backtesting for QQQ"
+authors = ["quant trader"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+yfinance = "^0.2.28"
+pandas = "^2.0.0"
+numpy = "^1.24.0"
+matplotlib = "^3.7.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -35,47 +35,39 @@ def load_review_file(review_path: str) -> Dict[str, Any]:
 def execute_import(review_path: str, config_path: str = "config/zotero-crawler.yaml") -> Dict[str, Any]:
     """
     Import papers that were approved in review.
-    
+
     Args:
         review_path: Path to review JSON file
         config_path: Path to crawler config
-        
+
     Returns:
         Import results
     """
     # Load review data
     review_data = load_review_file(review_path)
-    
+
     logger.info(f"Executing review from: {review_path}")
     logger.info(f"Total papers in review: {review_data['total_papers']}")
-    
+
     # Filter approved papers
     approved_papers = [p for p in review_data['papers'] if p.get('proposed_import', False)]
     skipped_papers = [p for p in review_data['papers'] if not p.get('proposed_import', False)]
-    
+
     logger.info(f"Approved for import: {len(approved_papers)}")
     logger.info(f"Skipped: {len(skipped_papers)}")
-    
-    if not approved_papers:
-        logger.info("No papers approved for import.")
-        return {
-            'imported': 0,
-            'skipped': len(skipped_papers),
-            'message': 'No papers approved for import'
-        }
-    
+
     # Load config and create pipeline
     config = load_config(config_path)
-    
+
     ss_api_key = config.get('api_keys', {}).get('semantic_scholar', '')
     zotero_config = config.get('zotero', {})
     zotero_library_id = zotero_config.get('library_id', '')
     zotero_api_key = zotero_config.get('api_key', '')
     zotero_library_type = zotero_config.get('library_type', 'user')
-    
+
     if not ss_api_key or not zotero_api_key:
         raise ValueError("Missing API keys in config")
-    
+
     pipeline = LiteraturePipeline(
         ss_api_key=ss_api_key,
         zotero_library_id=zotero_library_id,
@@ -83,14 +75,36 @@ def execute_import(review_path: str, config_path: str = "config/zotero-crawler.y
         zotero_library_type=zotero_library_type
     )
     pipeline.configure(config)
+
+    # Persist skipped decisions so irrelevant papers do not stay pending forever
+    for paper_data in skipped_papers:
+        skip_reason = (
+            paper_data.get('ai_reasoning')
+            or paper_data.get('skip_reason')
+            or 'Skipped during review'
+        )
+        try:
+            pipeline.database.mark_skipped(paper_data['paper_id'], skip_reason)
+            logger.info(f"⏭️ Skipped: {paper_data['title'][:60]}... ({skip_reason})")
+        except Exception as e:
+            logger.warning(f"Failed to mark skipped paper '{paper_data.get('paper_id')}' in database: {e}")
     
+    if not approved_papers:
+        logger.info("No papers approved for import.")
+        return {
+            'imported': 0,
+            'approved': 0,
+            'skipped_review': len(skipped_papers),
+            'message': 'No papers approved for import'
+        }
+
     # Import approved papers
     from datetime import datetime
-    
+
     today_str = review_data.get('date', datetime.now().strftime("%Y-%m-%d"))
     imported_count = 0
     topic_stats = {}
-    
+
     for paper_data in approved_papers:
         # Reconstruct Paper object
         paper = Paper(
@@ -110,12 +124,12 @@ def execute_import(review_path: str, config_path: str = "config/zotero-crawler.y
             fields_of_study=[],
             tldr=None
         )
-        
+
         topics = paper_data.get('topics', [])
-        
+
         for topic_id in topics if topics else ['uncategorized']:
             topic_name = pipeline.topics.get(topic_id, {}).get('name', topic_id) if topic_id != 'uncategorized' else 'Uncategorized'
-            
+
             try:
                 if pipeline.enable_topic_subfolders:
                     collection_key = pipeline.zotero.ensure_collection_path(
@@ -128,22 +142,22 @@ def execute_import(review_path: str, config_path: str = "config/zotero-crawler.y
                         pipeline.main_collection,
                         today_str
                     )
-                
+
                 item_key = pipeline.zotero.add_paper_to_collection(paper, collection_key)
-                
+
                 if item_key:
                     imported_count += 1
                     topic_stats[topic_id] = topic_stats.get(topic_id, 0) + 1
-                    
+
                     pipeline.dedup.mark_as_pushed(paper)
                     pipeline.database.mark_imported(paper.paper_id, item_key)
-                    
+
                     logger.info(f"✅ Imported: {paper.title[:60]}...")
                     break
-                    
+
             except Exception as e:
                 logger.error(f"❌ Failed to import '{paper.title[:50]}...': {e}")
-    
+
     # Generate summary
     summary = f"""
 {'='*50}
@@ -158,14 +172,14 @@ By topic:
     for topic_id, count in topic_stats.items():
         topic_name = pipeline.topic_classifier.get_topic_name(topic_id) if pipeline.topic_classifier else topic_id
         summary += f"  - {topic_name}: {count}\n"
-    
+
     summary += f"""
 Skipped during review: {len(skipped_papers)}
 {'='*50}
 """
-    
+
     logger.info(summary)
-    
+
     return {
         'imported': imported_count,
         'approved': len(approved_papers),
@@ -180,9 +194,9 @@ if __name__ == "__main__":
         print("Usage: python src/execute_review.py <review_json_file>")
         print("Example: python src/execute_review.py data/reviews/review_2026-04-01_023045.json")
         sys.exit(1)
-    
+
     review_file = sys.argv[1]
     config_file = sys.argv[2] if len(sys.argv) > 2 else "config/zotero-crawler.yaml"
-    
+
     results = execute_import(review_file, config_file)
     print("\n" + results.get('summary', 'No summary'))
