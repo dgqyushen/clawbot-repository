@@ -35,21 +35,15 @@ source .venv/bin/activate
 
 ## 配置
 
-编辑 `config/zotero-crawler.yaml`：
+敏感环境变量放在当前机器的 OpenClaw home 下：`$OPENCLAW_HOME/.env`（通常是 `~/.openclaw/.env`），不要放在项目目录里。
 
-```yaml
-keywords:
-  - "sodium iron sulfate"
-  - "Na-ion battery"
-
-api_keys:
-  semantic_scholar: "your-s2-api-key"
-
-zotero:
-  library_id: "12345678"
-  api_key: "your-zotero-api-key"
-  main_collection: "OpenClaw-Battery-Research"
+```bash
+mkdir -p ~/.openclaw
+cp .env.example ~/.openclaw/.env
+# 编辑 ~/.openclaw/.env
 ```
+
+项目配置仍放在 `config/zotero-crawler.yaml` / `config/topics/*.yaml`，但 API key 会优先从 `~/.openclaw/.env` 读取。
 
 ## 使用
 

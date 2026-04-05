@@ -1,228 +1,179 @@
-# Zotero Literature Crawler Configuration
-# Place this file in the same directory as the scripts or set CONFIG_PATH env var
-
-# Topic-based keyword mapping
-# Each topic has keywords and minimum quality requirements
 topics:
   si-c-anode:
-    name: "Si-C-Anode"
+    name: Si-C-Anode
     keywords:
-      - "silicon carbon anode"
-      - "Si-C composite"
-      - "silicon carbon battery"
-      - "Si/C anode"
-      - "silicon anode"
-      - "Si/C composite"
-      - "silicon carbon lithium"
-      - "Si-C lithium ion"
+    - silicon carbon anode
+    - Si-C composite
+    - silicon carbon battery
+    - Si/C anode
+    - silicon anode
+    - Si/C composite
+    - silicon carbon lithium
+    - Si-C lithium ion
     min_impact_factor: 7.0
     required_venues: []
     excluded_venues:
-      - "IEEE Transactions on Power Electronics"
-      - "International Journal for Research in Applied Science and Engineering Technology"
+    - IEEE Transactions on Power Electronics
+    - International Journal for Research in Applied Science and Engineering Technology
     excluded_keywords:
-      - "sodium"
-      - "sodium-ion"
-      - "sodium ion"
-      - "Na-ion"
-      - "Na ion"
-      - "potassium"
-      - "potassium ion"
-      - "tetracycline"
-      - "degradation"
-      - "wastewater"
-      - "pollutant"
-      - "contaminant"
-      - "electrocatalytic degradation"
-      - "electrochemical oxidation"
-      - "advanced oxidation"
-      - "chlorinated byproducts"
-      - "disinfection"
-      - "organic pollutant"
-      - "pharmaceutical"
-      - "antibiotic"
-      - "dye"
-      - "ROS generation"
-      - "reactive oxygen species"
-      - "electro-Fenton"
-      - "thermal management"
-      - "battery thermal"
-      - "cooling system"
-      - "heat dissipation"
-      - "battery management system"
-      - "state of charge"
-      - "state of health"
-      - "SOC estimation"
-      - "SOH estimation"
-      - "electrocatalytic"
-      - "hydrogen evolution"
-      - "oxygen evolution"
-      - "water splitting"
-      - "CO2 reduction"
-      - "nitrogen reduction"
-      - "fuel cell"
-      - "supercapacitor"
-      # 非硅碳负极材料（明确排除）
-      - "zinc"
-      - "zinc-ion"
-      - "zinc ion"
-      - "zinc anode"
-      - "tungsten"
-      - "tin oxide"
-      - "SnO"
-      - "SnO2"
-      - "TiO2"
-      - "titanium dioxide"
-      - "titania"
-      - "iron oxide"
-      - "Fe3O4"
-      - "Fe2O3"
-      - "cobalt"
-      - "Co3O4"
-      - "nickel"
-      - "NiO"
-      - "manganese"
-      - "MnO"
-      - "MnO2"
-      - "vanadium"
-      - "V2O5"
-      - "molybdenum"
-      - "MoS2"
-      - "graphite anode"  # 纯石墨负极，不是硅碳
-      - "hard carbon"  # 硬碳负极，不是硅碳
-      - "soft carbon"
-      - "graphene anode"  # 石墨烯负极，不是硅碳
-
-# Legacy keywords (for backward compatibility, will be deprecated)
+    - sodium
+    - sodium-ion
+    - sodium ion
+    - Na-ion
+    - Na ion
+    - potassium
+    - potassium ion
+    - tetracycline
+    - degradation
+    - wastewater
+    - pollutant
+    - contaminant
+    - electrocatalytic degradation
+    - electrochemical oxidation
+    - advanced oxidation
+    - chlorinated byproducts
+    - disinfection
+    - organic pollutant
+    - pharmaceutical
+    - antibiotic
+    - dye
+    - ROS generation
+    - reactive oxygen species
+    - electro-Fenton
+    - thermal management
+    - battery thermal
+    - cooling system
+    - heat dissipation
+    - battery management system
+    - state of charge
+    - state of health
+    - SOC estimation
+    - SOH estimation
+    - electrocatalytic
+    - hydrogen evolution
+    - oxygen evolution
+    - water splitting
+    - CO2 reduction
+    - nitrogen reduction
+    - fuel cell
+    - supercapacitor
+    - zinc
+    - zinc-ion
+    - zinc ion
+    - zinc anode
+    - tungsten
+    - tin oxide
+    - SnO
+    - SnO2
+    - TiO2
+    - titanium dioxide
+    - titania
+    - iron oxide
+    - Fe3O4
+    - Fe2O3
+    - cobalt
+    - Co3O4
+    - nickel
+    - NiO
+    - manganese
+    - MnO
+    - MnO2
+    - vanadium
+    - V2O5
+    - molybdenum
+    - MoS2
+    - graphite anode
+    - hard carbon
+    - soft carbon
+    - graphene anode
 keywords: []
-
-# Author whitelist (optional) - papers by these authors get priority
 author_whitelist: []
-
-# High-quality journal whitelist - 包含顶刊(IF>15)和二区优质期刊(IF>7-15)
 journal_whitelist:
-  # Nature/Science 家族 (IF >20)
-  - "Nature"
-  - "Nature Energy"  # IF ~50
-  - "Nature Materials"  # IF ~40
-  - "Nature Chemistry"
-  - "Nature Nanotechnology"
-  - "Nature Catalysis"
-  - "Nature Electronics"
-  - "Nature Reviews Materials"  # IF ~70
-  - "Nature Communications"  # 一区但质量参差，谨慎
-  - "Science"
-  - "Science Advances"
-  - "Joule"  # Cell 子刊 IF ~40
-  - "Matter"  # Cell 子刊
-  - "Cell Reports Physical Science"
-  - "Chem"
-  # 材料科学顶刊 (IF >15)
-  - "Advanced Materials"  # IF ~30
-  - "Advanced Energy Materials"  # IF ~25
-  - "Advanced Functional Materials"  # IF ~18
-  - "ACS Nano"  # IF ~15
-  - "Nano Letters"  # IF ~10，纳米顶刊
-  - "Materials Horizons"  # IF ~12
-  # 化学顶刊 (IF >10)
-  - "Journal of the American Chemical Society"  # IF ~15
-  - "Angewandte Chemie"  # IF ~15
-  - "Energy & Environmental Science"  # IF ~30
-  - "ACS Energy Letters"  # IF ~20
-  # 能源存储专业顶刊
-  - "Nano Energy"  # IF ~17
-  - "Energy Storage Materials"  # IF ~18
-  # 材料化学顶刊
-  - "Chemistry of Materials"  # IF ~8，但材料化学权威
-  - "Journal of Materials Chemistry A"  # IF ~10
-  # 顶级综述
-  - "Progress in Materials Science"  # IF ~40
-  - "Materials Science & Engineering: R"  # IF ~30
-  # ========== 扩展：二区优质期刊 (IF 7-15) ==========
-  # 能源存储/电池期刊
-  - "Journal of Power Sources"              # IF ~9-10
-  - "Journal of Energy Storage"               # IF ~8-9
-  - "Journal of The Electrochemical Society"  # IF ~3-4
-  - "Batteries & Supercaps"                   # IF ~6-7
-  - "Energy Technology"                       # IF ~6-7
-  - "Sustainable Energy & Fuels"              # IF ~6-7
-  - "Carbon Energy"                           # IF ~8
-  - "Chemical Engineering Journal"            # IF ~15
-  - "Applied Energy"                          # IF ~10
-  - "Renewable and Sustainable Energy Reviews" # IF ~16
-  - "Journal of Cleaner Production"           # IF ~11
-  - "Electrochimica Acta"                     # IF ~6-7
-  # 材料/纳米应用期刊
-  - "Small"                                   # IF ~13
-  - "Small Methods"                           # IF ~12
-  - "ACS Applied Materials & Interfaces"      # IF ~9
-  - "ACS Applied Nano Materials"              # IF ~6
-  - "ACS Applied Energy Materials"            # IF ~7
-  - "Nanoscale"                              # IF ~5-6
-  - "Nanomaterials"                           # IF ~5
-  - "Nanotechnology"                        # IF ~3-4
-  - "Applied Materials Today"                 # IF ~6-8
-  - "Materials Today Energy"                  # IF ~8-10
-  # 物理/跨学科期刊
-  - "2D Materials"
-  - "npj Computational Materials"             # IF ~10
-  - "Scientific Reports"                      # IF ~4
-
-# Journal blacklist - skip these venues
+- Nature
+- Nature Energy
+- Nature Materials
+- Nature Chemistry
+- Nature Nanotechnology
+- Nature Catalysis
+- Nature Electronics
+- Nature Reviews Materials
+- Nature Communications
+- Science
+- Science Advances
+- Joule
+- Matter
+- Cell Reports Physical Science
+- Chem
+- Advanced Materials
+- Advanced Energy Materials
+- Advanced Functional Materials
+- ACS Nano
+- Nano Letters
+- Materials Horizons
+- Journal of the American Chemical Society
+- Angewandte Chemie
+- Energy & Environmental Science
+- ACS Energy Letters
+- Nano Energy
+- Energy Storage Materials
+- Chemistry of Materials
+- Journal of Materials Chemistry A
+- Progress in Materials Science
+- 'Materials Science & Engineering: R'
+- Journal of Power Sources
+- Journal of Energy Storage
+- Journal of The Electrochemical Society
+- Batteries & Supercaps
+- Energy Technology
+- Sustainable Energy & Fuels
+- Carbon Energy
+- Chemical Engineering Journal
+- Applied Energy
+- Renewable and Sustainable Energy Reviews
+- Journal of Cleaner Production
+- Electrochimica Acta
+- Small
+- Small Methods
+- ACS Applied Materials & Interfaces
+- ACS Applied Nano Materials
+- ACS Applied Energy Materials
+- Nanoscale
+- Nanomaterials
+- Nanotechnology
+- Applied Materials Today
+- Materials Today Energy
+- 2D Materials
+- npj Computational Materials
+- Scientific Reports
 journal_blacklist:
-  - "predatory journal"
-  - "unverified source"
-  - "Journal of Pharmaceutical and Biomedical Analysis"
-  - "Biomedical Materials"
-  - "Acta Scientiarum Polonorum Technologia Alimentaria"
-  - "Proceedings of Universities"
-
-# Quality filters
+- predatory journal
+- unverified source
+- Journal of Pharmaceutical and Biomedical Analysis
+- Biomedical Materials
+- Acta Scientiarum Polonorum Technologia Alimentaria
+- Proceedings of Universities
 quality_filters:
-  # Minimum citation count to consider (for papers older than 1 year)
   min_citations: 5
-  
-  # Minimum h-index for first author (if available)
   min_author_hindex: 10
-  
-  # Prefer papers with PDF available
   require_pdf: false
-  
-  # Minimum paper age (days) to apply citation filter
   citation_filter_age_days: 365
-
-# Date range for search (days back from today)
 search_days_back: 7
-
-# Results per query (Semantic Scholar max ~100)
 max_results_per_query: 20
-
-# Rate limiting (Semantic Scholar: 1 req/sec)
 rate_limit_rps: 1
-
-# Daily import limit
-# Maximum number of papers to import per day (prioritizes high-quality papers)
 daily_import_limit: 5
-
-# Semantic Scholar API Key
 api_keys:
-  semantic_scholar: "2OucdpP9Ry4rtlJfkhsjWa8mDqRpjSi88Lp2XPVj"
-
-# Zotero Configuration
+  semantic_scholar: ${SEMANTIC_SCHOLAR_API_KEY}
 zotero:
-  library_id: "14021209"
-  api_key: "1lio7Ai65J0B1wsmBRAXL0ju"
-  main_collection: "OpenClaw-Battery-Research"
-  date_subfolder_format: "%Y-%m-%d"  # Creates subfolders like "2026-03-31"
-  enable_topic_subfolders: true  # Enable topic classification under date folders
-
-# Notification
+  library_id: ${ZOTERO_LIBRARY_ID:-14021209}
+  api_key: ${ZOTERO_API_KEY}
+  main_collection: OpenClaw-Battery-Research
+  date_subfolder_format: '%Y-%m-%d'
+  enable_topic_subfolders: true
+  library_type: ${ZOTERO_LIBRARY_TYPE:-user}
 notifications:
-  bark_url: "${VAULTWARDEN:zotero-crawler/bark_url}"
+  bark_url: ${BARK_URL:-https://bark.deepthinks.org}
   daily_summary: true
   paper_count_threshold: 1
-
-# Data persistence
 data_files:
-  dedup_cache: "data/literature-pushed.json"
-  log_file: "data/crawler.log"
+  dedup_cache: data/literature-pushed.json
+  log_file: data/crawler.log

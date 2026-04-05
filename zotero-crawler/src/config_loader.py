@@ -1,7 +1,7 @@
 """Configuration loader with environment variable support.
 
 Priority (highest to lowest):
-1. Environment variables
+1. Environment variables (including ~/.openclaw/.env style file loaded into process env)
 2. Local config files (config/local.yaml, not in git)
 3. Topic-specific config files
 4. Template defaults
@@ -13,6 +13,65 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional
 from loguru import logger
+
+
+_ENV_FILE_LOADED = False
+
+
+def _find_openclaw_home() -> Optional[Path]:
+    """Find the current machine's OpenClaw home directory.
+
+    Resolution order:
+    1. OPENCLAW_HOME environment variable
+    2. Walk upward from this file looking for an OpenClaw root marker
+    """
+    env_home = os.getenv("OPENCLAW_HOME")
+    if env_home:
+        candidate = Path(env_home).expanduser()
+        if (candidate / "openclaw.json").exists():
+            return candidate
+
+    current = Path(__file__).resolve()
+    for parent in current.parents:
+        if (parent / "openclaw.json").exists() and (parent / "workspace").exists():
+            return parent
+    return None
+
+
+def _load_openclaw_env_file() -> None:
+    """Load key=value pairs from the machine-local OpenClaw .env file into os.environ."""
+    global _ENV_FILE_LOADED
+    if _ENV_FILE_LOADED:
+        return
+
+    openclaw_home = _find_openclaw_home()
+    if not openclaw_home:
+        return
+
+    env_path = openclaw_home / ".env"
+    if not env_path.exists():
+        _ENV_FILE_LOADED = True
+        return
+
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[len("export "):].strip()
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if not key:
+            continue
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+            value = value[1:-1]
+        os.environ.setdefault(key, value)
+
+    logger.debug(f"Loaded OpenClaw env file: {env_path}")
+    _ENV_FILE_LOADED = True
 
 
 def _expand_env_vars(value: Any) -> Any:
@@ -44,6 +103,8 @@ def load_config(config_path: str) -> Dict[str, Any]:
     Returns:
         Merged configuration dict
     """
+    _load_openclaw_env_file()
+
     # Load base config from file
     config = _load_yaml(config_path)
     
@@ -104,13 +165,17 @@ def _get_env_overrides() -> Optional[Dict[str, Any]]:
     zotero_lib_type = os.getenv("ZOTERO_LIBRARY_TYPE")
     
     if any([zotero_lib_id, zotero_api_key, zotero_lib_type]):
-        zotero_cfg = overrides.setdefault("api_keys", {}).setdefault("zotero", {})
+        api_zotero_cfg = overrides.setdefault("api_keys", {}).setdefault("zotero", {})
+        top_level_zotero_cfg = overrides.setdefault("zotero", {})
         if zotero_lib_id:
-            zotero_cfg["library_id"] = zotero_lib_id
+            api_zotero_cfg["library_id"] = zotero_lib_id
+            top_level_zotero_cfg["library_id"] = zotero_lib_id
         if zotero_api_key:
-            zotero_cfg["api_key"] = zotero_api_key
+            api_zotero_cfg["api_key"] = zotero_api_key
+            top_level_zotero_cfg["api_key"] = zotero_api_key
         if zotero_lib_type:
-            zotero_cfg["library_type"] = zotero_lib_type
+            api_zotero_cfg["library_type"] = zotero_lib_type
+            top_level_zotero_cfg["library_type"] = zotero_lib_type
     
     # Bark notification
     bark_key = os.getenv("BARK_KEY")
@@ -150,6 +215,8 @@ def get_api_key(config: Dict[str, Any], key_path: str) -> Optional[str]:
     Returns:
         API key string or None
     """
+    _load_openclaw_env_file()
+
     # Try config first
     parts = key_path.split(".")
     value = config

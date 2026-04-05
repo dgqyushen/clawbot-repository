@@ -23,12 +23,15 @@ export BARK_KEY="your_bark_key"
 python scripts/daily_crawl.py --topic battery-research
 ```
 
-Or use a `.env` file (included in `.gitignore`):
+Or use your machine-local OpenClaw `.env` file:
 
 ```bash
-cp .env.example .env
-# Edit .env with your keys
+mkdir -p ~/.openclaw
+cp .env.example ~/.openclaw/.env
+# Edit ~/.openclaw/.env with your keys
 ```
+
+The loader will auto-discover `$OPENCLAW_HOME/.env` (or the current machine's `~/.openclaw/.env`) and apply it before reading project config.
 
 #### Option 2: Local Config File (Recommended for Development)
 
