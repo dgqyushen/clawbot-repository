@@ -1,8 +1,10 @@
 #!/bin/bash
 # Video Summarize Script - Download YouTube audio and transcribe with local Whisper
-# Uses isolated venv: /root/.openclaw/venvs/video-summarize
+# Uses isolated venv: $OPENCLAW_STATE_DIR/venvs/video-summarize
 
 set -e
+
+OPENCLAW_STATE_DIR="${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
 
 VIDEO_URL="$1"
 if [ -z "$VIDEO_URL" ]; then
@@ -10,7 +12,7 @@ if [ -z "$VIDEO_URL" ]; then
     exit 1
 fi
 
-VENV_PATH="/root/.openclaw/venvs/video-summarize"
+VENV_PATH="$OPENCLAW_STATE_DIR/venvs/video-summarize"
 
 echo "=== Video Summarize Pipeline ==="
 echo "URL: $VIDEO_URL"

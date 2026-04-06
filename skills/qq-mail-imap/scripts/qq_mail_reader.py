@@ -9,6 +9,14 @@ from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 
+def get_openclaw_state_dir() -> Path:
+    import os
+    return Path(
+        os.environ.get('OPENCLAW_STATE_DIR')
+        or (Path.home() / '.openclaw')
+    ).expanduser()
+
+
 def load_env(path: str) -> dict:
     data = {}
     for raw in Path(path).read_text(encoding='utf-8').splitlines():
@@ -62,7 +70,8 @@ def get_text_from_message(msg: Message) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description='Read recent QQ mail via IMAP')
-    parser.add_argument('--env-file', default='/root/.openclaw/workspace/config/qq-mail.env')
+    default_env_file = get_openclaw_state_dir() / 'workspace' / 'config' / 'qq-mail.env'
+    parser.add_argument('--env-file', default=str(default_env_file))
     parser.add_argument('--folder', default='INBOX')
     parser.add_argument('--limit', type=int, default=10)
     parser.add_argument('--unseen', action='store_true')

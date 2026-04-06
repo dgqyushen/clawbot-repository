@@ -196,7 +196,7 @@ def main():
     parser = argparse.ArgumentParser(description="Test Zotero import flow with mock data")
     parser.add_argument(
         "--config",
-        default="/root/.openclaw/workspace/projects/zotero-crawler/config/topics/battery-research.yaml",
+        default=str(Path(__file__).resolve().parent.parent / "config" / "topics" / "battery-research.yaml"),
         help="Path to config file",
     )
     parser.add_argument(

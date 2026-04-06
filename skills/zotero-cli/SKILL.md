@@ -24,7 +24,7 @@ description: Connect to Zotero library via zotero-cli tool for searching, managi
 ### 2. 配置凭证
 
 ```bash
-/root/.openclaw/workspace/scripts/zotero-cli.sh configure
+"${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/scripts/zotero-cli.sh" configure
 ```
 
 按提示输入：
@@ -38,19 +38,19 @@ description: Connect to Zotero library via zotero-cli tool for searching, managi
 
 ```bash
 # 搜索文献
-/root/.openclaw/workspace/scripts/zotero-cli.sh query "silicon anode"
+"${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/scripts/zotero-cli.sh" query "silicon anode"
 
 # 搜索短语
-/root/.openclaw/workspace/scripts/zotero-cli.sh query '"solid electrolyte interphase"'
+"${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/scripts/zotero-cli.sh" query '"solid electrolyte interphase"'
 
 # 布尔搜索
-/root/.openclaw/workspace/scripts/zotero-cli.sh query "(Li OR Na) AND battery"
+"${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/scripts/zotero-cli.sh" query "(Li OR Na) AND battery"
 
 # 添加笔记
-/root/.openclaw/workspace/scripts/zotero-cli.sh add-note "论文标题"
+"${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/scripts/zotero-cli.sh" add-note "论文标题"
 
 # 阅读 PDF
-/root/.openclaw/workspace/scripts/zotero-cli.sh read "论文标题"
+"${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/scripts/zotero-cli.sh" read "论文标题"
 ```
 
 ### 通过 OpenClaw 调用
@@ -62,7 +62,7 @@ description: Connect to Zotero library via zotero-cli tool for searching, managi
 我会执行：
 ```json
 {
-  "command": "/root/.openclaw/workspace/scripts/zotero-cli.sh query 'silicon anode'",
+  "command": "$OPENCLAW_STATE_DIR/workspace/scripts/zotero-cli.sh query 'silicon anode'",
   "pty": true,
   "timeout": 30
 }
@@ -119,10 +119,10 @@ openclaw cron add \
 
 ```bash
 # 检查虚拟环境
-ls -la /root/.venvs/zotero-cli/bin/zotcli
+ls -la "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/venvs/zotero/bin/zotcli"
 
 # 手动激活环境
-. /root/.venvs/zotero-cli/bin/activate
+. "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/venvs/zotero/bin/activate"
 zotcli --help
 ```
 

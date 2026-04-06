@@ -18,16 +18,16 @@ from loguru import logger
 _ENV_FILE_LOADED = False
 
 
-def _find_openclaw_home() -> Optional[Path]:
-    """Find the current machine's OpenClaw home directory.
+def _find_openclaw_state_dir() -> Optional[Path]:
+    """Find the current machine's OpenClaw state directory.
 
     Resolution order:
-    1. OPENCLAW_HOME environment variable
+    1. OPENCLAW_STATE_DIR environment variable
     2. Walk upward from this file looking for an OpenClaw root marker
     """
-    env_home = os.getenv("OPENCLAW_HOME")
-    if env_home:
-        candidate = Path(env_home).expanduser()
+    env_state_dir = os.getenv("OPENCLAW_STATE_DIR")
+    if env_state_dir:
+        candidate = Path(env_state_dir).expanduser()
         if (candidate / "openclaw.json").exists():
             return candidate
 
@@ -44,11 +44,11 @@ def _load_openclaw_env_file() -> None:
     if _ENV_FILE_LOADED:
         return
 
-    openclaw_home = _find_openclaw_home()
-    if not openclaw_home:
+    openclaw_state_dir = _find_openclaw_state_dir()
+    if not openclaw_state_dir:
         return
 
-    env_path = openclaw_home / ".env"
+    env_path = openclaw_state_dir / ".env"
     if not env_path.exists():
         _ENV_FILE_LOADED = True
         return

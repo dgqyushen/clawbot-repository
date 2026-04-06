@@ -42,7 +42,7 @@ For low-risk tasks like summarization, note-taking drafts, or simple Q&A, it is 
 
 - Prefer local transcription over cloud STT when the local pipeline is available.
 - Current local test path uses `scripts/transcribe_telegram_voice.py` in this skill directory.
-- Workspace convention: operational helper scripts live in `/root/.openclaw/workspace/scripts/`; if a reusable workflow matures, keep a skill-scoped copy here too.
+- Workspace convention: operational helper scripts live in `${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/scripts/`; if a reusable workflow matures, keep a skill-scoped copy here too.
 - Audio/media caches should not accumulate indefinitely; follow the aggressive cleanup policy already maintained via `HEARTBEAT.md`.
 
 ## Bundled script
@@ -52,8 +52,8 @@ Use `scripts/transcribe_telegram_voice.py` for local testing and deterministic t
 Example:
 
 ```bash
-/root/.openclaw/venvs/voice-stt/bin/python \
-  /root/.openclaw/workspace/skills/voice-intake-confirm/scripts/transcribe_telegram_voice.py \
+"${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/venvs/voice-stt/bin/python" \
+  "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/skills/voice-intake-confirm/scripts/transcribe_telegram_voice.py" \
   /path/to/voice.ogg --model small --device cpu --json
 ```
 

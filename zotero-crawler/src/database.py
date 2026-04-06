@@ -12,8 +12,11 @@ from pathlib import Path
 class PaperDatabase:
     """Manages SQLite database for paper tracking."""
     
-    def __init__(self, db_path: str = "/root/.openclaw/workspace/projects/zotero-crawler/data/papers.db"):
+    def __init__(self, db_path: str | None = None):
         """Initialize database connection."""
+        if db_path is None:
+            db_path = str(Path(__file__).resolve().parent.parent / "data" / "papers.db")
+
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         

@@ -31,7 +31,7 @@ cp .env.example ~/.openclaw/.env
 # Edit ~/.openclaw/.env with your keys
 ```
 
-The loader will auto-discover `$OPENCLAW_HOME/.env` (or the current machine's `~/.openclaw/.env`) and apply it before reading project config.
+The loader will auto-discover `$OPENCLAW_STATE_DIR/.env` (or the current machine's `~/.openclaw/.env`) and apply it before reading project config.
 
 #### Option 2: Local Config File (Recommended for Development)
 

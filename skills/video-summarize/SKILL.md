@@ -18,8 +18,9 @@ Download, transcribe, and summarize YouTube videos using local Whisper model.
 
 ```bash
 # Create isolated venv
-python3 -m venv /root/.openclaw/venvs/video-summarize
-source /root/.openclaw/venvs/video-summarize/bin/activate
+export OPENCLAW_STATE_DIR="${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
+python3 -m venv "$OPENCLAW_STATE_DIR/venvs/video-summarize"
+source "$OPENCLAW_STATE_DIR/venvs/video-summarize/bin/activate"
 pip install yt-dlp faster-whisper
 ```
 

@@ -19,7 +19,7 @@ Use this skill for QQ 邮箱 reading tasks through IMAP.
 
 Prefer a local env file at:
 
-`/root/.openclaw/workspace/config/qq-mail.env`
+`${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/config/qq-mail.env`
 
 Expected format:
 
@@ -36,20 +36,20 @@ Keep this file out of git.
 
 Use:
 
-`/root/.openclaw/workspace/skills/qq-mail-imap/scripts/qq_mail_reader.py`
+`${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/skills/qq-mail-imap/scripts/qq_mail_reader.py`
 
 Examples:
 
 ```bash
-python3 /root/.openclaw/workspace/skills/qq-mail-imap/scripts/qq_mail_reader.py --limit 5
-python3 /root/.openclaw/workspace/skills/qq-mail-imap/scripts/qq_mail_reader.py --unseen --limit 10
-python3 /root/.openclaw/workspace/skills/qq-mail-imap/scripts/qq_mail_reader.py --limit 20 --body-chars 300
+python3 "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/skills/qq-mail-imap/scripts/qq_mail_reader.py" --limit 5
+python3 "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/skills/qq-mail-imap/scripts/qq_mail_reader.py" --unseen --limit 10
+python3 "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/skills/qq-mail-imap/scripts/qq_mail_reader.py" --limit 20 --body-chars 300
 ```
 
 For a lightweight “important mail” pass, use the workspace helper:
 
 ```bash
-python3 /root/.openclaw/workspace/scripts/qq_mail_important.py --unseen --limit 12
+python3 "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/workspace/scripts/qq_mail_important.py" --unseen --limit 12
 ```
 
 ## Output guidance

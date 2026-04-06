@@ -23,27 +23,28 @@ OpenClaw-Battery-Research/
 ## 安装
 
 ```bash
-cd /root/.openclaw/workspace/projects/zotero-crawler
+export OPENCLAW_STATE_DIR="${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
+cd "$OPENCLAW_STATE_DIR/workspace/projects/zotero-crawler"
 poetry install
 ```
 
 或使用已创建的 venv:
 ```bash
-cd /root/.openclaw/workspace/projects/zotero-crawler
+cd "$OPENCLAW_STATE_DIR/workspace/projects/zotero-crawler"
 source .venv/bin/activate
 ```
 
 ## 配置
 
-敏感环境变量放在当前机器的 OpenClaw home 下：`$OPENCLAW_HOME/.env`（通常是 `~/.openclaw/.env`），不要放在项目目录里。
+敏感环境变量放在当前机器的 OpenClaw state 目录下：`$OPENCLAW_STATE_DIR/.env`（通常是 `~/.openclaw/.env`），不要放在项目目录里。
 
 ```bash
-mkdir -p ~/.openclaw
-cp .env.example ~/.openclaw/.env
-# 编辑 ~/.openclaw/.env
+mkdir -p "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
+cp .env.example "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/.env"
+# 编辑 "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/.env"
 ```
 
-项目配置仍放在 `config/zotero-crawler.yaml` / `config/topics/*.yaml`，但 API key 会优先从 `~/.openclaw/.env` 读取。
+项目配置仍放在 `config/zotero-crawler.yaml` / `config/topics/*.yaml`，但 API key 会优先从 `$OPENCLAW_STATE_DIR/.env`（默认 `~/.openclaw/.env`）读取。
 
 ## 使用
 
@@ -51,7 +52,7 @@ cp .env.example ~/.openclaw/.env
 
 ```bash
 # 使用 Poetry
-cd /root/.openclaw/workspace/projects/zotero-crawler
+cd "$OPENCLAW_STATE_DIR/workspace/projects/zotero-crawler"
 poetry run python src/daily_run.py
 
 # 或手动激活 venv
@@ -67,7 +68,7 @@ python daily_run.py
 ```json
 {
   "schedule": "0 9 * * *",
-  "command": "cd /root/.openclaw/workspace/projects/zotero-crawler && poetry run python src/daily_run.py",
+  "command": "cd $OPENCLAW_STATE_DIR/workspace/projects/zotero-crawler && poetry run python src/daily_run.py",
   "description": "Daily Zotero literature crawl"
 }
 ```

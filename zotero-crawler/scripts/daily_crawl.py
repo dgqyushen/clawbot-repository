@@ -12,6 +12,11 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from loguru import logger
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+CONFIG_DIR = PROJECT_ROOT / "config"
+TOPICS_DIR = CONFIG_DIR / "topics"
+LOG_DIR = PROJECT_ROOT / "logs"
+
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
@@ -30,10 +35,9 @@ def setup_logging():
         format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <level>{message}</level>",
         level="INFO",
     )
-    log_dir = Path("/root/.openclaw/workspace/projects/zotero-crawler/logs")
-    log_dir.mkdir(exist_ok=True)
+    LOG_DIR.mkdir(exist_ok=True)
     logger.add(
-        log_dir / "crawler_{time:YYYY-MM-DD}.log",
+        LOG_DIR / "crawler_{time:YYYY-MM-DD}.log",
         rotation="1 day",
         retention="30 days",
         level="DEBUG",
@@ -224,7 +228,7 @@ def main():
     parser = argparse.ArgumentParser(description="Daily literature crawler for Zotero")
     parser.add_argument(
         "--config",
-        default="/root/.openclaw/workspace/projects/zotero-crawler/config/template.yaml",
+        default=str(CONFIG_DIR / "template.yaml"),
         help="Path to config file (default: template.yaml). Create topic-specific configs in config/topics/",
     )
     parser.add_argument(
@@ -249,16 +253,16 @@ def main():
     
     # Determine config path
     if args.topic:
-        config_path = f"/root/.openclaw/workspace/projects/zotero-crawler/config/topics/{args.topic}.yaml"
-        if not Path(config_path).exists():
+        config_path = TOPICS_DIR / f"{args.topic}.yaml"
+        if not config_path.exists():
             logger.error(f"Topic config not found: {config_path}")
-            logger.info(f"Available topics: {list(Path('/root/.openclaw/workspace/projects/zotero-crawler/config/topics/').glob('*.yaml'))}")
+            logger.info(f"Available topics: {list(TOPICS_DIR.glob('*.yaml'))}")
             sys.exit(1)
     else:
-        config_path = args.config
+        config_path = Path(args.config)
     
     # Load config
-    config = load_config(config_path)
+    config = load_config(str(config_path))
     
     # Run crawl
     try:

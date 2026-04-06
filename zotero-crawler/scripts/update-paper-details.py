@@ -3,7 +3,10 @@
 更新已导入论文的完整日期格式 (YYYY-MM-DD)
 """
 import sys
-sys.path.insert(0, '/root/.openclaw/workspace/projects/zotero-crawler/src')
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / 'src'))
 
 import requests
 from pyzotero import zotero
