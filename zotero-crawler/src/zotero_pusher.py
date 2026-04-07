@@ -4,6 +4,7 @@ Handles Zotero integration: collection creation, date-based subfolders, and pape
 """
 
 import logging
+import re
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from dataclasses import asdict
@@ -45,6 +46,42 @@ class ZoteroPusher:
         
         # Cache for collection lookups
         self._collection_cache: Dict[str, str] = {}  # name -> collection_key
+        self._collection_item_identity_cache: Dict[str, Dict[str, str]] = {}
+
+    @staticmethod
+    def _normalize_doi(doi: Optional[str]) -> Optional[str]:
+        return doi.strip().lower() if doi else None
+
+    @staticmethod
+    def _extract_semantic_scholar_id(extra: str) -> Optional[str]:
+        if not extra:
+            return None
+        match = re.search(r'^Semantic Scholar ID:\s*(.+)$', extra, re.MULTILINE)
+        return match.group(1).strip() if match else None
+
+    def _get_collection_identity_cache(self, collection_key: str) -> Dict[str, str]:
+        if collection_key in self._collection_item_identity_cache:
+            return self._collection_item_identity_cache[collection_key]
+
+        cache: Dict[str, str] = {}
+        items = self.zot.collection_items(collection_key)
+        everything = getattr(self.zot, 'everything', None)
+        if callable(everything):
+            items = everything(items)
+
+        for item in items:
+            data = item.get('data', {}) if isinstance(item, dict) else {}
+            item_key = item.get('key') if isinstance(item, dict) else None
+            paper_id = self._extract_semantic_scholar_id(data.get('extra', ''))
+            doi = self._normalize_doi(data.get('DOI'))
+
+            if paper_id and item_key:
+                cache[f'paper_id:{paper_id}'] = item_key
+            if doi and item_key:
+                cache[f'doi:{doi}'] = item_key
+
+        self._collection_item_identity_cache[collection_key] = cache
+        return cache
         
     def _refresh_collection_cache(self):
         """Fetch all collections and update cache."""
@@ -255,6 +292,20 @@ class ZoteroPusher:
             Item key if successful, None otherwise
         """
         try:
+            identity_cache = self._get_collection_identity_cache(collection_key)
+            if paper.paper_id:
+                existing_key = identity_cache.get(f'paper_id:{paper.paper_id}')
+                if existing_key:
+                    logger.warning(f"Paper already exists in collection by paper_id, skipping create: {paper.paper_id}")
+                    return existing_key
+
+            normalized_doi = self._normalize_doi(getattr(paper, 'doi', None))
+            if normalized_doi:
+                existing_key = identity_cache.get(f'doi:{normalized_doi}')
+                if existing_key:
+                    logger.warning(f"Paper already exists in collection by DOI, skipping create: {normalized_doi}")
+                    return existing_key
+
             zotero_item = self.paper_to_zotero_item(paper)
             # Add collection to item - this puts it in the collection on creation
             zotero_item['collections'] = [collection_key]
@@ -292,6 +343,11 @@ class ZoteroPusher:
                 logger.error(f"Failed to parse Zotero response: {e}, response={response}")
             
             if item_key:
+                if paper.paper_id:
+                    identity_cache[f'paper_id:{paper.paper_id}'] = item_key
+                if normalized_doi:
+                    identity_cache[f'doi:{normalized_doi}'] = item_key
+
                 # Try to attach PDF if available
                 if paper.pdf_url:
                     try:

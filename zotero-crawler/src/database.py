@@ -58,18 +58,6 @@ class PaperDatabase:
             )
         """)
         
-        # Search history table
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS search_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                keyword TEXT NOT NULL,
-                searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                papers_found INTEGER DEFAULT 0,
-                new_papers INTEGER DEFAULT 0,
-                error_message TEXT
-            )
-        """)
-        
         # Index for fast lookups
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_papers_doi ON papers(doi)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_papers_title_hash ON papers(title_hash)")
@@ -208,15 +196,6 @@ class PaperDatabase:
         stats["skipped_count"] = cursor.fetchone()[0]
         
         return stats
-    
-    def record_search(self, keyword: str, papers_found: int, new_papers: int, error: Optional[str] = None):
-        """Record search history."""
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            INSERT INTO search_history (keyword, papers_found, new_papers, error_message)
-            VALUES (?, ?, ?, ?)
-        """, (keyword, papers_found, new_papers, error))
-        self.conn.commit()
     
     def close(self):
         """Close database connection."""

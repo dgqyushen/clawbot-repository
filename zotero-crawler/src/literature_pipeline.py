@@ -6,6 +6,7 @@ FIXED VERSION: Now properly records papers to database
 
 import json
 import logging
+import re
 from typing import List, Dict, Set, Any, Optional, Tuple
 from dataclasses import asdict
 from datetime import datetime, timedelta
@@ -23,7 +24,8 @@ class DedupStore:
     
     def __init__(self, cache_file: str):
         self.cache_file = Path(cache_file)
-        self.paper_ids: Set[str] = set()
+        self.pushed_ids: Set[str] = set()
+        self.pending_ids: Set[str] = set()
         self._load()
     
     def _load(self):
@@ -32,11 +34,20 @@ class DedupStore:
             try:
                 with open(self.cache_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                    self.paper_ids = set(data.get('paper_ids', []))
-                logger.info(f"Loaded dedup cache: {len(self.paper_ids)} papers tracked")
+                    if isinstance(data, dict):
+                        legacy_ids = data.get('paper_ids', [])
+                        self.pushed_ids = set(data.get('pushed', legacy_ids))
+                        self.pending_ids = set(data.get('pending', []))
+                    else:
+                        self.pushed_ids = set(data or [])
+                        self.pending_ids = set()
+                logger.info(
+                    f"Loaded dedup cache: pushed={len(self.pushed_ids)}, pending={len(self.pending_ids)}"
+                )
             except Exception as e:
                 logger.error(f"Failed to load dedup cache: {e}")
-                self.paper_ids = set()
+                self.pushed_ids = set()
+                self.pending_ids = set()
         else:
             logger.info("No dedup cache found, starting fresh")
     
@@ -46,7 +57,8 @@ class DedupStore:
             self.cache_file.parent.mkdir(parents=True, exist_ok=True)
             with open(self.cache_file, 'w', encoding='utf-8') as f:
                 json.dump({
-                    'paper_ids': sorted(list(self.paper_ids)),
+                    'pushed': sorted(list(self.pushed_ids)),
+                    'pending': sorted(list(self.pending_ids)),
                     'last_updated': datetime.now().isoformat()
                 }, f, indent=2)
         except Exception as e:
@@ -54,17 +66,32 @@ class DedupStore:
     
     def is_new(self, paper: Paper) -> bool:
         """Check if paper hasn't been seen before."""
-        return paper.paper_id not in self.paper_ids
-    
+        return paper.paper_id not in self.pushed_ids
+
+    def mark_as_pending(self, paper: Paper):
+        """Mark paper as pending review."""
+        if paper.paper_id not in self.pushed_ids:
+            self.pending_ids.add(paper.paper_id)
+            self._save()
+
+    def mark_multiple_as_pending(self, papers: List[Paper]):
+        """Batch mark papers as pending review."""
+        for paper in papers:
+            if paper.paper_id not in self.pushed_ids:
+                self.pending_ids.add(paper.paper_id)
+        self._save()
+
     def mark_as_pushed(self, paper: Paper):
         """Mark paper as pushed (record in cache)."""
-        self.paper_ids.add(paper.paper_id)
+        self.pending_ids.discard(paper.paper_id)
+        self.pushed_ids.add(paper.paper_id)
         self._save()
-    
+
     def mark_multiple_as_pushed(self, papers: List[Paper]):
         """Batch mark papers as pushed."""
         for paper in papers:
-            self.paper_ids.add(paper.paper_id)
+            self.pending_ids.discard(paper.paper_id)
+            self.pushed_ids.add(paper.paper_id)
         self._save()
 
 
@@ -116,28 +143,37 @@ class QualityFilter:
         excluded_keywords: Optional[List[str]] = None,  # ADDED
         min_citations: int = 0,
         citation_filter_age_days: int = 365,
-        require_pdf: bool = False
+        require_pdf: bool = False,
+        require_venue: bool = False
     ):
         self.journal_whitelist = [j.lower() for j in (journal_whitelist or [])]
         self.journal_blacklist = [j.lower() for j in (journal_blacklist or [])]
         self.excluded_keywords = [k.lower() for k in (excluded_keywords or [])]  # ADDED
+        self.excluded_patterns = [
+            re.compile(r'\b' + re.escape(keyword) + r'\b', re.IGNORECASE)
+            for keyword in self.excluded_keywords
+        ]
         self.min_citations = min_citations
         self.citation_filter_age_days = citation_filter_age_days
         self.require_pdf = require_pdf
-    
+        self.require_venue = require_venue
+
+    @staticmethod
+    def _normalize_venue(value: str) -> str:
+        return re.sub(r'\s+', ' ', re.sub(r'[^\w\s&]+', ' ', value.lower())).strip()
+
     def is_quality_venue(self, venue: Optional[str]) -> bool:
         """Check if venue is in whitelist or not in blacklist."""
         if not venue:
-            return True  # No venue info, can't filter
-        
+            return not self.require_venue and not self.journal_whitelist
+
         venue_lower = venue.lower()
-        venue_words = set(venue_lower.split())
-        
+        normalized_venue = self._normalize_venue(venue)
+
         # Blacklist check first
         for blacklisted in self.journal_blacklist:
-            # Check for exact word match or subphrase match
-            black_lower = blacklisted.lower()
-            if black_lower in venue_lower or black_lower in venue_words:
+            black_lower = self._normalize_venue(blacklisted)
+            if black_lower and black_lower == normalized_venue:
                 logger.debug(f"Venue '{venue}' matches blacklist '{blacklisted}'")
                 return False
         
@@ -149,8 +185,8 @@ class QualityFilter:
                 # OR whitelisted journal must be a complete word/phrase in venue
                 if venue_lower.startswith(whitelisted_lower):
                     return True
-                # Also check if whitelisted is a complete word in venue (for abbreviations like JACS)
-                if whitelisted_lower in venue_words:
+                whitelist_pattern = re.compile(r'\b' + re.escape(whitelisted_lower) + r'\b')
+                if whitelist_pattern.search(venue_lower):
                     return True
             # Not in whitelist
             logger.debug(f"Venue '{venue}' not in whitelist, filtering out")
@@ -163,9 +199,8 @@ class QualityFilter:
         # KEYWORD FILTER: Check title and abstract for excluded keywords
         if self.excluded_keywords:
             text_to_check = (paper.title or "") + " " + (paper.abstract or "")
-            text_lower = text_to_check.lower()
-            for keyword in self.excluded_keywords:
-                if keyword in text_lower:
+            for keyword, pattern in zip(self.excluded_keywords, self.excluded_patterns):
+                if pattern.search(text_to_check):
                     logger.debug(f"Paper '{paper.title[:50]}...' filtered: excluded keyword '{keyword}'")
                     return False
         
@@ -248,16 +283,19 @@ class LiteraturePipeline:
             topic_excluded_keywords = topic_config.get('excluded_keywords', [])
             excluded_keywords.extend(topic_excluded_keywords)
         
-        journal_whitelist = config.get('journal_whitelist', [])
+        top_level_whitelist = config.get('journal_whitelist', [])
+        quality_whitelist = quality_config.get('journal_whitelist', [])
+        journal_whitelist = list(dict.fromkeys(top_level_whitelist + quality_whitelist))
         logger.info(f"QualityFilter: whitelist={len(journal_whitelist)} journals, blacklist={len(journal_blacklist)} journals, excluded_keywords={len(excluded_keywords)}")
-        
+
         self.quality_filter = QualityFilter(
             journal_whitelist=journal_whitelist,
             journal_blacklist=list(set(journal_blacklist)) if journal_blacklist else None,  # Remove duplicates
             excluded_keywords=list(set(excluded_keywords)) if excluded_keywords else None,  # ADDED
             min_citations=quality_config.get('min_citations', 0),
             citation_filter_age_days=quality_config.get('citation_filter_age_days', 365),
-            require_pdf=quality_config.get('require_pdf', False)
+            require_pdf=quality_config.get('require_pdf', False),
+            require_venue=quality_config.get('require_venue', bool(journal_whitelist))
         )
         
         # Deduplication
@@ -369,11 +407,6 @@ class LiteraturePipeline:
         results['new_papers_before_limit'] = len(new_papers)
         logger.info(f"{len(new_papers)} papers are new (not in cache or database)")
         
-        # ADDED: Record all new papers to database (before importing)
-        for paper in new_papers:
-            topics = paper_topics.get(paper.paper_id, [])
-            self.database.add_paper(paper, topics)
-        
         if not new_papers:
             logger.info("No new papers to import. Pipeline complete.")
             return results
@@ -406,6 +439,11 @@ class LiteraturePipeline:
         
         if skipped_due_to_limit > 0:
             logger.info(f"Daily limit applied: importing top {len(papers_to_import)} papers, skipping {skipped_due_to_limit} lower-quality papers")
+
+        for paper in papers_to_import:
+            topics = paper_topics.get(paper.paper_id, [])
+            self.database.add_paper(paper, topics)
+        self.dedup.mark_multiple_as_pending(papers_to_import)
         
         # NEW Step 5.5: AI Review Layer - Pause for human/AI review before import
         if papers_to_import:
@@ -461,7 +499,7 @@ class LiteraturePipeline:
                             topic_stats[topic_id] += 1
                         
                         # Only mark as pushed once (even if in multiple topics)
-                        if paper.paper_id not in self.dedup.paper_ids:
+                        if paper.paper_id not in self.dedup.pushed_ids:
                             self.dedup.mark_as_pushed(paper)
                         
                         # ADDED: Mark as imported in database
@@ -544,6 +582,7 @@ class LiteraturePipeline:
                 "publication_date": paper.publication_date,
                 "citation_count": paper.citation_count,
                 "pdf_url": paper.pdf_url,
+                "doi": paper.doi,
                 "topics": topics,
                 "proposed_import": True,
                 "ai_recommendation": "pending",

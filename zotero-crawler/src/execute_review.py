@@ -8,6 +8,7 @@ Usage:
 
 import json
 import sys
+import time
 from pathlib import Path
 from typing import Dict, List, Any
 import logging
@@ -15,7 +16,7 @@ import logging
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from literature_pipeline import LiteraturePipeline, run_pipeline_from_config
+from literature_pipeline import LiteraturePipeline
 from semantic_scholar import Paper
 from config_loader import load_config
 
@@ -30,6 +31,20 @@ def load_review_file(review_path: str) -> Dict[str, Any]:
     """Load review JSON file."""
     with open(review_path, 'r', encoding='utf-8') as f:
         return json.load(f)
+
+
+def cleanup_old_review_files(config_path: str, days: int = 30):
+    """Delete old review JSON/Markdown files."""
+    review_dir = Path(config_path).resolve().parent.parent / 'data' / 'reviews'
+    if not review_dir.exists():
+        return
+
+    cutoff = time.time() - days * 86400
+    for json_file in review_dir.glob('review_*.json'):
+        if json_file.stat().st_mtime < cutoff:
+            json_file.unlink(missing_ok=True)
+            json_file.with_suffix('.md').unlink(missing_ok=True)
+            logger.info(f"🧹 Removed old review file: {json_file.name}")
 
 
 def execute_import(review_path: str, config_path: str = "config/zotero-crawler.yaml") -> Dict[str, Any]:
@@ -85,12 +100,31 @@ def execute_import(review_path: str, config_path: str = "config/zotero-crawler.y
         )
         try:
             pipeline.database.mark_skipped(paper_data['paper_id'], skip_reason)
-            logger.info(f"⏭️ Skipped: {paper_data['title'][:60]}... ({skip_reason})")
+            skipped_paper = Paper(
+                paper_id=paper_data['paper_id'],
+                title=paper_data['title'],
+                abstract=paper_data.get('abstract'),
+                authors=paper_data['authors'],
+                venue=paper_data['venue'],
+                year=paper_data['year'],
+                publication_date=paper_data.get('publication_date'),
+                citation_count=paper_data.get('citation_count', 0),
+                reference_count=0,
+                influential_citation_count=0,
+                pdf_url=paper_data.get('pdf_url'),
+                url=f"https://semanticscholar.org/paper/{paper_data['paper_id']}",
+                doi=paper_data.get('doi'),
+                fields_of_study=[],
+                tldr=None
+            )
+            pipeline.dedup.mark_as_pushed(skipped_paper)
+            logger.info(f"⏭️ Skipped & cached: {paper_data['title'][:60]}... ({skip_reason})")
         except Exception as e:
             logger.warning(f"Failed to mark skipped paper '{paper_data.get('paper_id')}' in database: {e}")
     
     if not approved_papers:
         logger.info("No papers approved for import.")
+        cleanup_old_review_files(config_path)
         return {
             'imported': 0,
             'approved': 0,
@@ -179,6 +213,7 @@ Skipped during review: {len(skipped_papers)}
 """
 
     logger.info(summary)
+    cleanup_old_review_files(config_path)
 
     return {
         'imported': imported_count,

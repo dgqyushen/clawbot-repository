@@ -88,63 +88,6 @@ topics:
     - graphene anode
 keywords: []
 author_whitelist: []
-journal_whitelist:
-- Nature
-- Nature Energy
-- Nature Materials
-- Nature Chemistry
-- Nature Nanotechnology
-- Nature Catalysis
-- Nature Electronics
-- Nature Reviews Materials
-- Nature Communications
-- Science
-- Science Advances
-- Joule
-- Matter
-- Cell Reports Physical Science
-- Chem
-- Advanced Materials
-- Advanced Energy Materials
-- Advanced Functional Materials
-- ACS Nano
-- Nano Letters
-- Materials Horizons
-- Journal of the American Chemical Society
-- Angewandte Chemie
-- Energy & Environmental Science
-- ACS Energy Letters
-- Nano Energy
-- Energy Storage Materials
-- Chemistry of Materials
-- Journal of Materials Chemistry A
-- Progress in Materials Science
-- 'Materials Science & Engineering: R'
-- Journal of Power Sources
-- Journal of Energy Storage
-- Journal of The Electrochemical Society
-- Batteries & Supercaps
-- Energy Technology
-- Sustainable Energy & Fuels
-- Carbon Energy
-- Chemical Engineering Journal
-- Applied Energy
-- Renewable and Sustainable Energy Reviews
-- Journal of Cleaner Production
-- Electrochimica Acta
-- Small
-- Small Methods
-- ACS Applied Materials & Interfaces
-- ACS Applied Nano Materials
-- ACS Applied Energy Materials
-- Nanoscale
-- Nanomaterials
-- Nanotechnology
-- Applied Materials Today
-- Materials Today Energy
-- 2D Materials
-- npj Computational Materials
-- Scientific Reports
 journal_blacklist:
 - predatory journal
 - unverified source
@@ -156,7 +99,65 @@ quality_filters:
   min_citations: 5
   min_author_hindex: 10
   require_pdf: false
+  require_venue: true
   citation_filter_age_days: 365
+  journal_whitelist:
+  - Nature
+  - Nature Energy
+  - Nature Materials
+  - Nature Chemistry
+  - Nature Nanotechnology
+  - Nature Catalysis
+  - Nature Electronics
+  - Nature Reviews Materials
+  - Nature Communications
+  - Science
+  - Science Advances
+  - Joule
+  - Matter
+  - Cell Reports Physical Science
+  - Chem
+  - Advanced Materials
+  - Advanced Energy Materials
+  - Advanced Functional Materials
+  - ACS Nano
+  - Nano Letters
+  - Materials Horizons
+  - Journal of the American Chemical Society
+  - Angewandte Chemie
+  - Energy & Environmental Science
+  - ACS Energy Letters
+  - Nano Energy
+  - Energy Storage Materials
+  - Chemistry of Materials
+  - Journal of Materials Chemistry A
+  - Progress in Materials Science
+  - 'Materials Science & Engineering: R'
+  - Journal of Power Sources
+  - Journal of Energy Storage
+  - Journal of The Electrochemical Society
+  - Batteries & Supercaps
+  - Energy Technology
+  - Sustainable Energy & Fuels
+  - Carbon Energy
+  - Chemical Engineering Journal
+  - Applied Energy
+  - Renewable and Sustainable Energy Reviews
+  - Journal of Cleaner Production
+  - Electrochimica Acta
+  - Small
+  - Small Methods
+  - ACS Applied Materials & Interfaces
+  - ACS Applied Nano Materials
+  - ACS Applied Energy Materials
+  - Nanoscale
+  - Nanomaterials
+  - Nanotechnology
+  - Applied Materials Today
+  - Materials Today Energy
+  - 2D Materials
+  - npj Computational Materials
+  - Scientific Reports
 search_days_back: 7
 max_results_per_query: 20
 rate_limit_rps: 1
